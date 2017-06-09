@@ -19,6 +19,7 @@ ind = ($0000)
 use rom::*;
 use cpu::opcodes::lda::*;
 use cpu::opcodes::sta::*;
+use cpu::opcodes::register::*;
 
 fn main() {
     let mut cpu = cpu::CPU::new();
@@ -28,6 +29,14 @@ fn main() {
     let mut it: usize = 0;
     let op = get_byte(&rom, &mut it);
     match op {
+        // Register
+        0x18 => clc(&mut cpu),
+        0x38 => sec(&mut cpu),
+        0x58 => cli(&mut cpu),
+        0x78 => sei(&mut cpu),
+        0xB8 => clv(&mut cpu),
+        0xD8 => cld(&mut cpu),
+        0xF8 => sed(&mut cpu),
         // LDA
         0x49 => lda_imm(&mut cpu, get_byte(&rom, &mut it)),
         0xA5 => lda_zp(&mut cpu, &ram, get_byte(&rom, &mut it)),

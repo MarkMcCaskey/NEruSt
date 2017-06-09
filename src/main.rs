@@ -21,6 +21,7 @@ use cpu::opcodes::lda::*;
 use cpu::opcodes::sta::*;
 use cpu::opcodes::register::*;
 use cpu::opcodes::asl::*;
+use cpu::opcodes::and::*;
 
 fn main() {
     let mut cpu = cpu::CPU::new();
@@ -63,6 +64,16 @@ fn main() {
         0x0E => asl_abs(&mut cpu, &mut ram, get_word(&rom, &mut it)),
         0x16 => asl_zpx(&mut cpu, &mut ram, get_byte(&rom, &mut it)),
         0x1E => asl_abx(&mut cpu, &mut ram, get_word(&rom, &mut it)),
+
+        // AND
+        0x21 => and_izx(&mut cpu, &ram, get_byte(&rom, &mut it)),
+        0x25 => and_zp(&mut cpu, &ram, get_byte(&rom, &mut it)),
+        0x29 => and_imm(&mut cpu, get_byte(&rom, &mut it)),
+        0x2D => and_abs(&mut cpu, &ram, get_word(&rom, &mut it)),
+        0x31 => and_izy(&mut cpu, &ram, get_byte(&rom, &mut it)),
+        0x35 => and_zpx(&mut cpu, &ram, get_byte(&rom, &mut it)),
+        0x39 => and_aby(&mut cpu, &ram, get_word(&rom, &mut it)),
+        0x3D => and_abx(&mut cpu, &ram, get_word(&rom, &mut it)),
         
 
         // NOP

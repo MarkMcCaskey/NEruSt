@@ -20,6 +20,7 @@ use rom::*;
 use cpu::opcodes::lda::*;
 use cpu::opcodes::sta::*;
 use cpu::opcodes::register::*;
+use cpu::opcodes::asl::*;
 
 fn main() {
     let mut cpu = cpu::CPU::new();
@@ -55,6 +56,14 @@ fn main() {
         0x7D => sta_abs(&cpu, &mut ram, get_word(&rom, &mut it)),
         0x9D => sta_abx(&cpu, &mut ram, get_word(&rom, &mut it)),
         0x99 => sta_aby(&cpu, &mut ram, get_word(&rom, &mut it)),
+
+        // ASL
+        0x06 => asl_zp(&mut cpu, &mut ram, get_byte(&rom, &mut it)),
+        0x0A => asl_acc(&mut cpu),
+        0x0E => asl_abs(&mut cpu, &mut ram, get_word(&rom, &mut it)),
+        0x16 => asl_zpx(&mut cpu, &mut ram, get_byte(&rom, &mut it)),
+        0x1E => asl_abx(&mut cpu, &mut ram, get_word(&rom, &mut it)),
+        
 
         // NOP
 

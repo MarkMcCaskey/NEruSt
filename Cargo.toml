@@ -1,0 +1,6 @@
+[package]
+name = "NEruSt"
+version = "0.0.1"
+authors = ["Akourne Burschtein"]
+
+[dependencies]

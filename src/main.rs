@@ -18,7 +18,7 @@ ind = ($0000)
 
 use rom::*;
 use cpu::opcodes::lda::*;
-//use cpu::opcodes::lda::*;
+use cpu::opcodes::sta::*;
 
 fn main() {
     let mut cpu = cpu::CPU { acc: 0, x: 0, y: 0 };
@@ -39,11 +39,23 @@ fn main() {
         0xB9 => lda_aby(&mut cpu, &ram, get_word(&rom, &mut it)),	
 
         // STA
+        0x85 => sta_zp(&cpu, &mut ram, get_byte(&rom, &mut it)),
+        0x95 => sta_zpx(&cpu, &mut ram, get_byte(&rom, &mut it)),
+        0x81 => sta_izx(&cpu, &mut ram, get_byte(&rom, &mut it)),
+        0x91 => sta_izy(&cpu, &mut ram, get_byte(&rom, &mut it)),
+        0x7D => sta_abs(&cpu, &mut ram, get_word(&rom, &mut it)),
+        0x9D => sta_abx(&cpu, &mut ram, get_word(&rom, &mut it)),
+        0x99 => sta_aby(&cpu, &mut ram, get_word(&rom, &mut it)),
 
+        // NOP
 
-	// Shouldn't ever happen. If it does... well, yuh dun fuck'd son
+        // KIL
+
+	   // Shouldn't ever happen. If it does... well, yuh dun fuck'd son
         _ => println!("uh-oh"),
     }
 
     println!("{acc}", acc = cpu.acc);
 }
+
+

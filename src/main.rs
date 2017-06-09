@@ -21,7 +21,7 @@ use cpu::opcodes::lda::*;
 //use cpu::opcodes::lda::*;
 
 fn main() {
-    let mut cpu = cpu::CPU { acc: 0, x: 0, y: 0 };
+    let mut cpu = cpu::CPU::new();
     let mut ram = ram::RAM { data: vec![0x15, 0x25] };
     let mut rom = rom::ROM { data: vec![0xA5, 0x01] };
 

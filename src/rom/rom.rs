@@ -9,7 +9,7 @@ pub fn get_byte(rom: &ROM, it: &mut usize) -> u8 {
 }
 
 pub fn get_word(rom: &ROM, it: &mut usize) -> u16 {
-    let ret: u16 = (rom.data[*it] as u16) << 8 + rom.data[*it + 1];
+    let ret: u16 = (rom.data[*it] as u16) << 8 | (rom.data[*it + 1] as u16);
     *it += 2;
     ret
 }

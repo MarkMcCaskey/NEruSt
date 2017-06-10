@@ -11,7 +11,7 @@ pub fn sta_zp(cpu: &cpu::cpu::CPU, ram: &mut ram::ram::RAM, adr: u8) {
 
 // 95: STA $aa,x
 pub fn sta_zpx(cpu: &cpu::cpu::CPU, ram: &mut ram::ram::RAM, adr: u8) {
-	ram.data[(adr + cpu.x) as usize] = cpu.acc;
+	ram.data[adr.wrapping_add(cpu.x) as usize] = cpu.acc;
 }
 
 // STA $00,y
@@ -26,11 +26,12 @@ pub fn sta_izx(cpu: &cpu::cpu::CPU, ram: &mut ram::ram::RAM, adr: u8) {
 
 // 91: STA ($aa),y
 pub fn sta_izy(cpu: &cpu::cpu::CPU, ram: &mut ram::ram::RAM, adr: u8) {
-	let temp : usize = (ram.data[adr as usize] + cpu.y) as usize;
-	ram.data[temp] = cpu.acc;
+	let val: u16 = (ram.data[adr as usize] as u16) << 8 | (ram.data[adr.wrapping_add(1) as usize] as u16);
+	ram.data[(val + cpu.y as u16) as usize] = cpu.acc;
 }
 
-// 8D: STA $aabb
+// STA $aabb
+// Does not exist
 
 // 7D: STA $aabb
 pub fn sta_abs(cpu: &cpu::cpu::CPU, ram: &mut ram::ram::RAM, adr: u16) {
@@ -39,10 +40,10 @@ pub fn sta_abs(cpu: &cpu::cpu::CPU, ram: &mut ram::ram::RAM, adr: u16) {
 
 // 9D: STA $aabb,x
 pub fn sta_abx(cpu: &cpu::cpu::CPU, ram: &mut ram::ram::RAM, adr: u16) {
-	ram.data[(adr + cpu.x as u16) as usize] = cpu.acc;
+	ram.data[adr.wrapping_add(cpu.x as u16) as usize] = cpu.acc;
 }
 
 // 99: STA $aabb,y
 pub fn sta_aby(cpu: &cpu::cpu::CPU, ram: &mut ram::ram::RAM, adr: u16) {
-	ram.data[(adr + cpu.y as u16) as usize] = cpu.acc;
+	ram.data[adr.wrapping_add(cpu.y as u16) as usize] = cpu.acc;
 }

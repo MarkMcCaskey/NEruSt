@@ -1,5 +1,3 @@
-/*use ram::ram::RAM;
-use cpu::cpu::CPU;*/
 use ram;
 use cpu;
 
@@ -22,12 +20,6 @@ pub fn lda_zp(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) {
     lda_set_flags(cpu);
 }
 
-// AD: LDA $aabb
-pub fn lda_abs(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u16) {
-    cpu.acc = ram.data[adr as usize];
-    lda_set_flags(cpu);
-}
-
 // B5: LDA $aa,x
 pub fn lda_zpx(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) {
     cpu.acc = ram.data[adr.wrapping_add(cpu.x) as usize];
@@ -46,21 +38,30 @@ pub fn lda_izx(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) {
 
 // B1: LDA (&aa),y
 pub fn lda_izy(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) {
-    cpu.acc = ram.data[(ram.data[adr as usize] + cpu.y) as usize];
+    // get the 2 byte value at the address (Yes, it will not cross page boundries)
+    let val: u16 = (ram.data[adr as usize] as u16) << 8 | ram.data[adr.wrapping_add(1) as usize] as u16;
+    // treat it like an aby now
+    cpu.acc = ram.data[(val + cpu.y as u16) as usize];
+    lda_set_flags(cpu);
+}
+
+// AD: LDA $aabb
+pub fn lda_abs(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u16) {
+    cpu.acc = ram.data[adr as usize];
     lda_set_flags(cpu);
 }
 
 // BD: LDA $aabb,x
 pub fn lda_abx(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u16) {
-    cpu.acc = ram.data[(adr + cpu.x as u16) as usize];
+    cpu.acc = ram.data[adr.wrapping_add(cpu.x as u16) as usize];
     lda_set_flags(cpu);
 }
 
 // B9: LDA $aabb,y
 pub fn lda_aby(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u16) {
-    cpu.acc = ram.data[(adr + cpu.y as u16) as usize];
+    cpu.acc = ram.data[adr.wrapping_add(cpu.y as u16) as usize];
     lda_set_flags(cpu);
 }
 
-// LDA ($aa)
+// LDA ($aabb)
 // Does not exist

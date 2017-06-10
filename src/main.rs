@@ -2,20 +2,6 @@ pub mod cpu;
 pub mod ram;
 pub mod rom;
 
-/* Ill find a better place to put this. When implementing the "match switch", try
-to keep your function calls in order. Look to the LDA parts for guidance.
-imm = #$00
-zp = $00
-zpx = $00,X
-zpy = $00,Y
-izx = ($00,X)
-izy = ($00),Y
-abs = $0000
-abx = $0000,X
-aby = $0000,Y
-ind = ($0000)
-*/
-
 use rom::*;
 use cpu::opcodes::lda::*;
 use cpu::opcodes::sta::*;
@@ -39,6 +25,7 @@ fn main() {
         0xB8 => clv(&mut cpu),
         0xD8 => cld(&mut cpu),
         0xF8 => sed(&mut cpu),
+        
         // LDA
         0x49 => lda_imm(&mut cpu, get_byte(&rom, &mut it)),
         0xA5 => lda_zp(&mut cpu, &ram, get_byte(&rom, &mut it)),

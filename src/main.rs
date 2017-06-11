@@ -8,6 +8,8 @@ use cpu::opcodes::sta::*;
 use cpu::opcodes::register::*;
 use cpu::opcodes::asl::*;
 use cpu::opcodes::and::*;
+use cpu::opcodes::rol::*;
+use cpu::opcodes::ror::*;
 
 fn main() {
     let mut cpu = cpu::CPU::new();
@@ -73,12 +75,29 @@ fn main() {
         0x39 => and_aby(&mut cpu, &ram, get_word(&rom, &mut it)),
         0x3D => and_abx(&mut cpu, &ram, get_word(&rom, &mut it)),
 
+        // ROL
+        0x2A => rol_acc(&mut cpu),
+        0x26 => rol_zp(&mut cpu, &mut ram, get_byte(&rom, &mut it)),
+        0x36 => rol_zpx(&mut cpu, &mut ram, get_byte(&rom, &mut it)),
+        0x2E => rol_abs(&mut cpu, &mut ram, get_word(&rom, &mut it)),
+        0x3E => rol_abx(&mut cpu, &mut ram, get_word(&rom, &mut it)),
+
+        // ROR
+        0x6A => ror_acc(&mut cpu),
+        0x66 => ror_zp(&mut cpu, &mut ram, get_byte(&rom, &mut it)),
+        0x76 => ror_zpx(&mut cpu, &mut ram, get_byte(&rom, &mut it)),
+        0x6E => ror_abs(&mut cpu, &mut ram, get_word(&rom, &mut it)),
+        0x7E => ror_abx(&mut cpu, &mut ram, get_word(&rom, &mut it)),
+
+        
+
 
         // NOP
 
         // KIL
 
 	   // Shouldn't ever happen. If it does... well, yuh dun fuck'd son
+        // NOTE: can use unreachable!() to tell the compiler this ^
         _ => println!("uh-oh"),
     }
 

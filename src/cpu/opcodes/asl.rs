@@ -3,22 +3,10 @@ use ram::ram::RAM;
 
 fn shift_and_conditionally_set_carry_and_zero(cpu: &mut CPU, val: u8) -> u8 {
     let old_bit7 = val & (0x80);
-
-    //conditionally set or clear carry flag
-    if old_bit7 == 0x80 {
-        cpu.set_processor_status_flag(ProcessorStatusFlag::Carry)
-    } else {
-        cpu.clear_processor_status_flag(ProcessorStatusFlag::Carry)
-    }
+    cpu.set_flag_value(ProcessorStatusFlag::Carry, old_bit7 == 0x80);
 
     let new_val = val << 1;
-
-    //conditionally set or clear zero flag
-    if new_val == 0 {
-        cpu.set_processor_status_flag(ProcessorStatusFlag::Zero)
-    } else {
-        cpu.clear_processor_status_flag(ProcessorStatusFlag::Zero)
-    }
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, new_val == 0);
 
     new_val
 }

@@ -37,27 +37,7 @@ impl CPU {
     }
 
     pub fn get_processor_status_flag(&self, flag: ProcessorStatusFlag) -> bool {
-        ((self.p >> (flag as u8)) & 1) == 1
-    }
-
-    #[deprecated]
-    pub fn set_processor_status_flag(&mut self, flag: ProcessorStatusFlag) {
-        let active_flag_bit = 1 << (flag as u8);
-        let flag_mask = !active_flag_bit;
-
-        //clear flag
-        self.p &= flag_mask;
-
-        //set flag
-        self.p |= active_flag_bit;
-    }
-
-    #[deprecated]
-    pub fn clear_processor_status_flag(&mut self, flag: ProcessorStatusFlag) {
-        let active_flag_bit = 1 << (flag as u8);
-        let flag_mask = !active_flag_bit;
-
-        //clear flag
-        self.p &= flag_mask;
+        let flag_bit = 1 << (flag as u8);
+        (self.p & flag_bit) == flag_bit
     }
 }

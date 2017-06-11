@@ -3,13 +3,9 @@ use ram::ram::RAM;
 
 fn set_acc_and_conditionally_zero_flag(cpu: &mut CPU, val: u8) {
     cpu.acc &= val;
+    let new_zero_flag_value = cpu.acc == 0;
 
-    //conditionally set zero flag
-    if cpu.acc == 0 {
-        cpu.set_processor_status_flag(ProcessorStatusFlag::Zero)
-    } else {
-        cpu.clear_processor_status_flag(ProcessorStatusFlag::Zero)
-    }
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, new_zero_flag_value)
 }
 
 // $29

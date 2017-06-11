@@ -25,6 +25,17 @@ fn main() {
         0xB8 => clv(&mut cpu),
         0xD8 => cld(&mut cpu),
         0xF8 => sed(&mut cpu),
+
+        0xAA => tax(&mut cpu),
+        0x8A => txa(&mut cpu),
+        0xCA => dex(&mut cpu),
+        0xE8 => inx(&mut cpu),
+
+        0xA8 => tay(&mut cpu),
+        0x98 => tya(&mut cpu),
+        0x88 => dey(&mut cpu),
+        0xC8 => iny(&mut cpu),
+            
         
         // LDA
         0x49 => lda_imm(&mut cpu, get_byte(&rom, &mut it)),
@@ -61,7 +72,7 @@ fn main() {
         0x35 => and_zpx(&mut cpu, &ram, get_byte(&rom, &mut it)),
         0x39 => and_aby(&mut cpu, &ram, get_word(&rom, &mut it)),
         0x3D => and_abx(&mut cpu, &ram, get_word(&rom, &mut it)),
-        
+
 
         // NOP
 

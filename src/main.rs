@@ -8,6 +8,7 @@ use cpu::opcodes::sta::*;
 use cpu::opcodes::register::*;
 use cpu::opcodes::asl::*;
 use cpu::opcodes::and::*;
+use cpu::opcodes::ora::*;
 use cpu::opcodes::rol::*;
 use cpu::opcodes::ror::*;
 
@@ -74,6 +75,16 @@ fn main() {
         0x35 => and_zpx(&mut cpu, &ram, get_byte(&rom, &mut it)),
         0x39 => and_aby(&mut cpu, &ram, get_word(&rom, &mut it)),
         0x3D => and_abx(&mut cpu, &ram, get_word(&rom, &mut it)),
+
+        // ORA
+        0x01 => ora_izx(&mut cpu, &ram, get_byte(&rom, &mut it)),
+        0x05 => ora_zp(&mut cpu, &ram, get_byte(&rom, &mut it)),
+        0x09 => ora_imm(&mut cpu, get_byte(&rom, &mut it)),
+        0x0D => ora_abs(&mut cpu, &ram, get_word(&rom, &mut it)),
+        0x11 => ora_izy(&mut cpu, &ram, get_byte(&rom, &mut it)),
+        0x15 => ora_zpx(&mut cpu, &ram, get_byte(&rom, &mut it)),
+        0x19 => ora_aby(&mut cpu, &ram, get_word(&rom, &mut it)),
+        0x1D => ora_abx(&mut cpu, &ram, get_word(&rom, &mut it)),       
 
         // ROL
         0x2A => rol_acc(&mut cpu),

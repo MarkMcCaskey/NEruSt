@@ -1,6 +1,6 @@
 Just gonnda dump some shit here for the time being
 
-// Memory addressing modes
+/// Memory adressing modes
 imm = #$00
 zp = $00
 zpx = $00,X
@@ -12,25 +12,13 @@ abx = $0000,X
 aby = $0000,Y
 ind = ($0000)
 
-// How "izx" works
-ixy isn't used nearly as often as "izy." In fact, it is not used once anywhere in the
-Super Mario Bros rom. It works like zpx, but dereferences the result.
+/// Not so obvious "features"
+ZP indexing will not leave ZP when crossing the page boundary:
+LDX #$01
+LDA $0xFF,x // this will NOT load $0x0100, rather it will load $0x0000
+LDA $0x00FF,x // this _WILL_ load $0x0100, since it is in abs adressing mode
 
-Lets say your RAM looks like this:
-$2C: 0x20
-$2D: 0x22
-$2E: 0x10
-$2F: 0x11
-
-and "x" contained 2
-``LDA ($2C,x)`` would become ``LDA $1011``
-
-// How "izy" works
-It is far more common than izx. It works like izx, except it dereferences first, then indexes.
-
-Imagine this: Lets say your RAM looks like this
-$13: 0x25
-$14: 0x45
-
-and "y" contained 5
-``LDA ($13),y`` would become ``LDA $2545``
+Indrect addressing will not fetch adresses that cross page boundaries (even in abs!):
+LDX #$00
+LDA ($FF),y // this will fetch the lobyte from $00FF and the hibyte from $0000 
+JMP ($06FF) // this will fetch the lobyte from $06FF and the hibyte from $0600

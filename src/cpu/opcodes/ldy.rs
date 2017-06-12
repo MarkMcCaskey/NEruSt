@@ -9,21 +9,25 @@ fn ldy_set_flags(cpu: &mut cpu::cpu::CPU) {
 }
 
 // A0: LDY #$aa
-pub fn ldy_imm(cpu: &mut cpu::cpu::CPU, val: u8) {
+pub fn ldy_imm(cpu: &mut cpu::cpu::CPU, val: u8) -> u8 {
     cpu.y = val;
     ldy_set_flags(cpu);
+    2
 }
 
 // A4: LDY $aa
-pub fn ldy_zp(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) {
+pub fn ldy_zp(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) -> u8 {
     cpu.y = ram.data[adr as usize];
     ldy_set_flags(cpu);
+    3
 }
 
 // B5: LDY $aa,x
-pub fn ldy_zpx(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) {
-    cpu.y = ram.data[adr.wrapping_add(cpu.x) as usize];
+pub fn ldy_zpx(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) -> u8 {
+    let indexed_adr = adr.wrapping_add(cpu.x);
+    cpu.y = ram.data[indexed_adr as usize];
     ldy_set_flags(cpu);
+    4
 }
 
 // LDY $aa,y
@@ -36,15 +40,18 @@ pub fn ldy_zpx(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) {
 // Does not exist
 
 // AC: LDY $aabb
-pub fn ldy_abs(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u16) {
+pub fn ldy_abs(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u16) -> u8 {
     cpu.y = ram.data[adr as usize];
     ldy_set_flags(cpu);
+    4
 }
 
 // BC: LDY $aabb,x
-pub fn ldy_abx(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u16) {
-    cpu.y = ram.data[adr.wrapping_add(cpu.x as u16) as usize];
+pub fn ldy_abx(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u16) -> u8 {
+    let indexed_adr: u16 = adr + cpu.x as u16;
+    cpu.y = ram.data[indexed_adr as usize];
     ldy_set_flags(cpu);
+    4 + (indexed_adr > adr | 0x0FF) as u8
 }
 
 // BE: LDY $aabb,y

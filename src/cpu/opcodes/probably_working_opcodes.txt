@@ -1,0 +1,10 @@
+lda.rs
+ldx.rs
+ldy.rs
+sta.rs
+stx.rs
+sty.rs
+nop.rs
+register.rs
+
+Probably everything that is "imm", "zp" or "abs" (anything that is not indexed)

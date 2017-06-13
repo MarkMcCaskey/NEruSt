@@ -11,6 +11,7 @@ use cpu::opcodes::and::*;
 use cpu::opcodes::ora::*;
 use cpu::opcodes::rol::*;
 use cpu::opcodes::ror::*;
+use cpu::opcodes::adc::*;
 
 fn main() {
     let mut cpu = cpu::CPU::new();

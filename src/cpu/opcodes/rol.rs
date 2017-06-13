@@ -14,27 +14,32 @@ fn rol_value(cpu: &mut CPU, val: u8) -> u8 {
     new_val
 }
 
-pub fn rol_acc(cpu: &mut CPU) {
+pub fn rol_acc(cpu: &mut CPU) -> u8 {
     let val = cpu.acc;
     cpu.acc = rol_value(cpu, val);
+    0
 }
 
-pub fn rol_zp(cpu: &mut CPU, ram: &mut RAM, adr: u8) {
+pub fn rol_zp(cpu: &mut CPU, ram: &mut RAM, adr: u8) -> u8 {
     let val = ram.data[adr as usize];
     ram.data[adr as usize] = rol_value(cpu, val);
+    0
 }
 
-pub fn rol_zpx(cpu: &mut CPU, ram: &mut RAM, adr: u8) {
+pub fn rol_zpx(cpu: &mut CPU, ram: &mut RAM, adr: u8) -> u8 {
     let val = ram.data[((adr as u16) + (cpu.x as u16)) as usize];
     ram.data[((adr as u16) + (cpu.x as u16)) as usize] = rol_value(cpu, val);
+    0
 }
 
-pub fn rol_abs(cpu: &mut CPU, ram: &mut RAM, adr: u16) {
+pub fn rol_abs(cpu: &mut CPU, ram: &mut RAM, adr: u16) -> u8 {
     let val = ram.data[adr as usize];
     ram.data[adr as usize] = rol_value(cpu, val);
+    0
 }
 
-pub fn rol_abx(cpu: &mut CPU, ram: &mut RAM, adr: u16) {
+pub fn rol_abx(cpu: &mut CPU, ram: &mut RAM, adr: u16) -> u8 {
     let val = ram.data[(adr + (cpu.x as u16)) as usize];
     ram.data[(adr + (cpu.x as u16)) as usize] = rol_value(cpu, val);
+    0
 }

@@ -14,27 +14,32 @@ fn ror_value(cpu: &mut CPU, val: u8) -> u8 {
     new_val
 }
 
-pub fn ror_acc(cpu: &mut CPU) {
+pub fn ror_acc(cpu: &mut CPU) -> u8 {
     let val = cpu.acc;
     cpu.acc = ror_value(cpu, val);
+    0
 }
 
-pub fn ror_zp(cpu: &mut CPU, ram: &mut RAM, adr: u8) {
+pub fn ror_zp(cpu: &mut CPU, ram: &mut RAM, adr: u8) -> u8 {
     let val = ram.data[adr as usize];
     ram.data[adr as usize] = ror_value(cpu, val);
+    0
 }
 
-pub fn ror_zpx(cpu: &mut CPU, ram: &mut RAM, adr: u8) {
+pub fn ror_zpx(cpu: &mut CPU, ram: &mut RAM, adr: u8) -> u8 {
     let val = ram.data[((adr as u16) + (cpu.x as u16)) as usize];
     ram.data[((adr as u16) + (cpu.x as u16)) as usize] = ror_value(cpu, val);
+    0
 }
 
-pub fn ror_abs(cpu: &mut CPU, ram: &mut RAM, adr: u16) {
+pub fn ror_abs(cpu: &mut CPU, ram: &mut RAM, adr: u16) -> u8 {
     let val = ram.data[adr as usize];
     ram.data[adr as usize] = ror_value(cpu, val);
+    0
 }
 
-pub fn ror_abx(cpu: &mut CPU, ram: &mut RAM, adr: u16) {
+pub fn ror_abx(cpu: &mut CPU, ram: &mut RAM, adr: u16) -> u8 {
     let val = ram.data[(adr + (cpu.x as u16)) as usize];
     ram.data[(adr + (cpu.x as u16)) as usize] = ror_value(cpu, val);
+    0
 }

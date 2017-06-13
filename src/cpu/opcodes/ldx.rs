@@ -8,47 +8,54 @@ fn ldx_set_flags(cpu: &mut cpu::cpu::CPU) {
     cpu.set_flag_value(cpu::cpu::ProcessorStatusFlag::Negative, negative_flag);
 }
 
-// A2: LDY #$aa
-pub fn ldx_imm(cpu: &mut cpu::cpu::CPU, val: u8) {
+// A2: LDX #$aa
+pub fn ldx_imm(cpu: &mut cpu::cpu::CPU, val: u8) -> u8 {
     cpu.x = val;
     ldx_set_flags(cpu);
+    2
 }
 
-// A7: LDY $aa
-pub fn ldx_zp(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) {
+// A6: LDX $aa
+pub fn ldx_zp(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) -> u8 {
     cpu.x = ram.data[adr as usize];
     ldx_set_flags(cpu);
+    3
 }
 
-// LDY $aa,x
+// LDX $aa,x
 // Does not exist
 
-// LDY $aa,y
-pub fn ldx_zpy(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) {
-    cpu.x = ram.data[adr.wrapping_add(cpu.y) as usize];
+// B6: LDX $aa,y
+pub fn ldx_zpy(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u8) -> u8 {
+    let indexed_adr = adr.wrapping_add(cpu.y);
+    cpu.x = ram.data[indexed_adr as usize];
     ldx_set_flags(cpu);
+    4
 }
 
-// LDY ($aa,x)
+// LDX ($aa,x)
 // Does not exist
 
-// LDY (&aa),y
+// LDX (&aa),y
 // Does not exist
 
-// AE: LDY $aabb
-pub fn ldx_abs(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u16) {
+// AE: LDX $aabb
+pub fn ldx_abs(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u16) -> u8 {
     cpu.x = ram.data[adr as usize];
     ldx_set_flags(cpu);
+    4
 }
 
-// LDY $aabb,x
+// LDX $aabb,x
 // Does not exist
 
-// BE: LDY $aabb,y
-pub fn ldx_aby(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u16) {
-    cpu.x = ram.data[adr.wrapping_add(cpu.y as u16) as usize];
+// BE: LDX $aabb,y
+pub fn ldx_aby(cpu: &mut cpu::cpu::CPU, ram: &ram::ram::RAM, adr: u16) -> u8 {
+    let indexed_adr: u16 = adr + cpu.y as u16;
+    cpu.x = ram.data[indexed_adr as usize];
     ldx_set_flags(cpu);
+    4 + (indexed_adr > adr | 0x0FF) as u8
 }
 
-// LDY ($aabb)
+// LDX ($aabb)
 // Does not exist

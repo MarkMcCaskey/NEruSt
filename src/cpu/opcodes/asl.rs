@@ -17,7 +17,7 @@ pub fn asl_acc(cpu: &mut CPU) -> u8 {
     let new_val = shift_and_conditionally_set_carry_and_zero(cpu, val);
 
     cpu.acc = new_val;
-    0
+    2
 }
 
 // $06
@@ -26,7 +26,7 @@ pub fn asl_zp(cpu: &mut CPU, ram: &mut RAM, adr: u8) -> u8 {
     let new_val = shift_and_conditionally_set_carry_and_zero(cpu, val);
 
     ram.data[adr as usize] = new_val;
-    0
+    5
 }
 
 // $16
@@ -35,7 +35,7 @@ pub fn asl_zpx(cpu: &mut CPU, ram: &mut RAM, adr: u8) -> u8 {
     let new_val = shift_and_conditionally_set_carry_and_zero(cpu, val);
 
     ram.data[(adr + cpu.x) as usize] = new_val;
-    0
+    6
 }
 
 // $0E
@@ -44,7 +44,7 @@ pub fn asl_abs(cpu: &mut CPU, ram: &mut RAM, adr: u16) -> u8 {
     let new_val = shift_and_conditionally_set_carry_and_zero(cpu, val);
 
     ram.data[adr as usize] = new_val;
-    0
+    6
 }
 
 // $1E
@@ -53,5 +53,5 @@ pub fn asl_abx(cpu: &mut CPU, ram: &mut RAM, adr: u16) -> u8 {
     let new_val = shift_and_conditionally_set_carry_and_zero(cpu, val);
 
     ram.data[(adr + (cpu.x as u16)) as usize] = new_val;
-    0
+    7
 }

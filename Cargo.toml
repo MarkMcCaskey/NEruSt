@@ -4,3 +4,4 @@ version = "0.0.1"
 authors = ["Akourne Burschtein"]
 
 [dependencies]
+sdl2 = "0.30.0"

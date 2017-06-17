@@ -11,54 +11,56 @@ fn set_acc_and_conditionally_zero_flag(cpu: &mut CPU, val: u8) {
 // $29
 pub fn and_imm(cpu: &mut CPU, val: u8) -> u8 {
     set_acc_and_conditionally_zero_flag(cpu, val);
-    0
+    2
 }
 
 // $25
 pub fn and_zp(cpu: &mut CPU, ram: &RAM, adr: u8) -> u8 {
     let val = ram.data[adr as usize];
     set_acc_and_conditionally_zero_flag(cpu, val);
-    0
+    3
 }
 
 // $35
 pub fn and_zpx(cpu: &mut CPU, ram: &RAM, adr: u8) -> u8 {
     let val = ram.data[((adr as u16) + (cpu.x as u16)) as usize];
     set_acc_and_conditionally_zero_flag(cpu, val);
-    0
+    4
 }
 
 // $2D
 pub fn and_abs(cpu: &mut CPU, ram: &RAM, adr: u16) -> u8 {
     let val = ram.data[adr as usize];
     set_acc_and_conditionally_zero_flag(cpu, val);
-    0
+    4
 }
 
 // $3D
 pub fn and_abx(cpu: &mut CPU, ram: &RAM, adr: u16) -> u8 {
     let val = ram.data[(adr + (cpu.x as u16)) as usize];
     set_acc_and_conditionally_zero_flag(cpu, val);
-    0
+    4 + ((adr > 0xFF) as u8)
 }
 
 // $39
 pub fn and_aby(cpu: &mut CPU, ram: &RAM, adr: u16) -> u8 {
     let val = ram.data[(adr + (cpu.y as u16)) as usize];
     set_acc_and_conditionally_zero_flag(cpu, val);
-    0
+    4 + ((adr > 0xFF) as u8)
 }
 
 // $21
 pub fn and_izx(cpu: &mut CPU, ram: &RAM, adr: u8) -> u8 {
     let val = ram.data[(ram.data[((adr as u16) + (cpu.x as u16)) as usize]) as usize];
     set_acc_and_conditionally_zero_flag(cpu, val);
-    0
+    6
 }
 
 // $31
 pub fn and_izy(cpu: &mut CPU, ram: &RAM, adr: u8) -> u8 {
-    let val = ram.data[(ram.data[adr as usize] + cpu.y) as usize];
+    let second_address = ((ram.data[adr as usize] as u16) + (cpu.y as u16));
+    let val = ram.data[second_address as usize];
     set_acc_and_conditionally_zero_flag(cpu, val);
+    //which address?
     0
 }

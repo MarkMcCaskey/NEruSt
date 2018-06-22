@@ -1,15 +1,15 @@
-pub struct ROM {
+pub struct Rom {
     pub data: Vec<u8>,
 }
 
-pub fn get_byte(rom: &ROM, it: &mut usize) -> u8 {
-    let ret: u8 = rom.data[*it];
+pub fn get_byte(rom: &Rom, it: &mut u16) -> u8 {
+    let ret: u8 = rom.data[*it as usize];
     *it += 1;
     ret
 }
 
-pub fn get_word(rom: &ROM, it: &mut usize) -> u16 {
-    let ret: u16 = (rom.data[*it] as u16) << 8 | (rom.data[*it + 1] as u16);
+pub fn get_word(rom: &Rom, it: &mut u16) -> u16 {
+    let ret: u16 = (rom.data[*it as usize] as u16) << 8 | (rom.data[*it as usize + 1] as u16);
     *it += 2;
     ret
 }

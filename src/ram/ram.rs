@@ -1,3 +1,3 @@
-pub struct RAM {
+pub struct Ram {
     pub data: Vec<u8>,
 }

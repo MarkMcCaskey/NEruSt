@@ -1,7 +1,7 @@
 [package]
 name = "NEruSt"
 version = "0.0.1"
-authors = ["Akourne Burschtein"]
+authors = ["Akourne Burschtein", "Mark McCaskey"]
 
 [dependencies]
-sdl2 = "0.30.0"
+sdl2 = "0.31.0"

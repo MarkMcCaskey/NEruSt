@@ -2,20 +2,24 @@ pub mod cpu;
 pub mod ram;
 pub mod rom;
 
-use rom::rom::*;
-use ram::ram::*;
+use cpu::addressing_modes::*;
 use cpu::cpu::*;
 use cpu::opcode_logic::*;
-use cpu::addressing_modes::*;
+use ram::ram::*;
+use rom::rom::*;
 
 fn main() {
     let mut cpu = CPU::new();
-    let mut ram = RAM { data: vec![0x15, 0x25] };
-    let rom = ROM { data: vec![0xA5, 0x01] };
+    let mut ram = RAM {
+        data: vec![0x15, 0x25],
+    };
+    let rom = ROM {
+        data: vec![0xA5, 0x01],
+    };
 
     let mut it: usize = 0;
     let op = get_byte(&rom, &mut it);
-    let cyc = match op {      
+    let cyc = match op {
         // LDA
         0x49 => {
             let data = get_byte(&rom, &mut it);
@@ -81,10 +85,11 @@ fn main() {
             6
         }
 
-	   // Shouldn't ever happen. If it does... well, yuh dun fuck'd son
+        // Shouldn't ever happen. If it does... well, yuh dun fuck'd son
         // NOTE: can use unreachable!() to tell the compiler this ^
-        _ => {unreachable!(); 255},
+        _ => {
+            unreachable!();
+            255
+        }
     };
 }
-
-

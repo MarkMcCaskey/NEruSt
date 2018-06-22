@@ -1,5 +1,5 @@
-use cpu::cpu::{CPU, ProcessorStatusFlag};
 use cpu::addressing_modes::OpcodeOperand;
+use cpu::cpu::{ProcessorStatusFlag, CPU};
 use ram::ram::RAM;
 
 //////////////////////////////////////////////////
@@ -212,13 +212,23 @@ pub fn iny(cpu: &mut CPU) {
 fn adc(cpu: &mut CPU, ram: &RAM, opop: OpcodeOperand) {
     let old_acc: u8 = cpu.acc;
     let val: u8 = match opop {
-        OpcodeOperand::Implied => {unreachable!(); 0},
-        OpcodeOperand::Immediate(val) => {cpu.acc.wrapping_add(val); val},
-        OpcodeOperand::Address(adr) => {cpu.acc.wrapping_add(ram.data[adr as usize]); ram.data[adr as usize]},
+        OpcodeOperand::Implied => {
+            unreachable!();
+            0
+        }
+        OpcodeOperand::Immediate(val) => {
+            cpu.acc.wrapping_add(val);
+            val
+        }
+        OpcodeOperand::Address(adr) => {
+            cpu.acc.wrapping_add(ram.data[adr as usize]);
+            ram.data[adr as usize]
+        }
     };
 
     let negative_flag = cpu.acc & 0x80 == 0x80;
-    let overflow_flag = (!old_acc & !val & cpu.acc & 0x80) == 0x80 || (old_acc & val & !cpu.acc & 0x80) == 0x80;
+    let overflow_flag =
+        (!old_acc & !val & cpu.acc & 0x80) == 0x80 || (old_acc & val & !cpu.acc & 0x80) == 0x80;
     let carry_flag = cpu.acc < old_acc;
     let zero_flag = cpu.acc == 0;
     cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
@@ -230,13 +240,23 @@ fn adc(cpu: &mut CPU, ram: &RAM, opop: OpcodeOperand) {
 fn sbc(cpu: &mut CPU, ram: &RAM, opop: OpcodeOperand) {
     let old_acc: u8 = cpu.acc;
     let val: u8 = match opop {
-        OpcodeOperand::Implied => {unreachable!(); 0},
-        OpcodeOperand::Immediate(val) => {cpu.acc.wrapping_sub(val); val},
-        OpcodeOperand::Address(adr) => {cpu.acc.wrapping_sub(ram.data[adr as usize]); ram.data[adr as usize]},
+        OpcodeOperand::Implied => {
+            unreachable!();
+            0
+        }
+        OpcodeOperand::Immediate(val) => {
+            cpu.acc.wrapping_sub(val);
+            val
+        }
+        OpcodeOperand::Address(adr) => {
+            cpu.acc.wrapping_sub(ram.data[adr as usize]);
+            ram.data[adr as usize]
+        }
     };
 
     let negative_flag = cpu.acc & 0x80 == 0x80;
-    let overflow_flag = (!old_acc & !val & cpu.acc & 0x80) == 0x80 || (old_acc & val & !cpu.acc & 0x80) == 0x80;
+    let overflow_flag =
+        (!old_acc & !val & cpu.acc & 0x80) == 0x80 || (old_acc & val & !cpu.acc & 0x80) == 0x80;
     let carry_flag = cpu.acc > old_acc;
     let zero_flag = cpu.acc == 0;
     cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
@@ -250,20 +270,21 @@ fn sbc(cpu: &mut CPU, ram: &RAM, opop: OpcodeOperand) {
 ///// Shift opcodes
 fn rol(cpu: &mut CPU, ram: &mut RAM, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
-        OpcodeOperand::Implied => { 
+        OpcodeOperand::Implied => {
             let old_val = cpu.acc;
             cpu.acc << 1 | cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
             (old_val, cpu.acc)
-        },
+        }
         OpcodeOperand::Immediate(val) => {
             unreachable!();
             (0, 0)
-        },
+        }
         OpcodeOperand::Address(adr) => {
             let old_val = ram.data[adr as usize];
-            ram.data[adr as usize] << 1 | cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
+            ram.data[adr as usize] << 1
+                | cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
             (old_val, ram.data[adr as usize])
-        },
+        }
     };
 
     let negative_flag = new_val & 0x80 == 0x80;
@@ -276,20 +297,21 @@ fn rol(cpu: &mut CPU, ram: &mut RAM, opop: OpcodeOperand) {
 
 fn ror(cpu: &mut CPU, ram: &mut RAM, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
-        OpcodeOperand::Implied => { 
+        OpcodeOperand::Implied => {
             let old_val = cpu.acc;
             cpu.acc >> 1 | cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
             (old_val, cpu.acc)
-        },
+        }
         OpcodeOperand::Immediate(val) => {
             unreachable!();
             (0, 0)
-        },
+        }
         OpcodeOperand::Address(adr) => {
             let old_val = ram.data[adr as usize];
-            ram.data[adr as usize] >> 1 | ((cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8) << 7);
+            ram.data[adr as usize] >> 1
+                | ((cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8) << 7);
             (old_val, ram.data[adr as usize])
-        },
+        }
     };
 
     let negative_flag = new_val & 0x80 == 0x80;
@@ -302,11 +324,11 @@ fn ror(cpu: &mut CPU, ram: &mut RAM, opop: OpcodeOperand) {
 
 fn lsr(cpu: &mut CPU, ram: &mut RAM, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
-        OpcodeOperand::Implied => { 
+        OpcodeOperand::Implied => {
             let old_val = cpu.acc;
             cpu.acc >> 1;
             (old_val, cpu.acc)
-        },
+        }
         OpcodeOperand::Immediate(val) => {
             unreachable!();
             (0, 0)
@@ -315,7 +337,7 @@ fn lsr(cpu: &mut CPU, ram: &mut RAM, opop: OpcodeOperand) {
             let old_val = ram.data[adr as usize];
             ram.data[adr as usize] >> 1;
             (old_val, ram.data[adr as usize])
-        },
+        }
     };
 
     let negative_flag = new_val & 0x80 == 0x80;
@@ -328,20 +350,20 @@ fn lsr(cpu: &mut CPU, ram: &mut RAM, opop: OpcodeOperand) {
 
 fn asl(cpu: &mut CPU, ram: &mut RAM, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
-        OpcodeOperand::Implied => { 
+        OpcodeOperand::Implied => {
             let old_val = cpu.acc;
             cpu.acc << 1;
             (old_val, cpu.acc)
-        },
+        }
         OpcodeOperand::Immediate(val) => {
             unreachable!();
             (0, 0)
-        },
+        }
         OpcodeOperand::Address(adr) => {
             let old_val = ram.data[adr as usize];
             ram.data[adr as usize] << 1;
             (old_val, ram.data[adr as usize])
-        },
+        }
     };
 
     let negative_flag = new_val & 0x80 == 0x80;

@@ -51,7 +51,6 @@ impl Cpu {
     pub fn run_instruction(&mut self, ram: &mut Ram, rom: &Rom) -> u8 {
         let op = get_byte(&rom, &mut self.pc);
         match op {
-            // LDA
             0x49 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = imm(data);
@@ -59,18 +58,11 @@ impl Cpu {
                 2
             }
 
-            0xA5 => {
+            0x81 => {
                 let data = get_byte(&rom, &mut self.pc);
-                let opop = zp(data);
-                lda(self, &ram, opop);
-                3
-            }
-
-            0xB5 => {
-                let data = get_byte(&rom, &mut self.pc);
-                let opop = zpx(data, self.x);
-                lda(self, &ram, opop);
-                4
+                let opop = izx(&ram, data, self.x);
+                sta(&self, ram, opop);
+                6
             }
 
             0xA1 => {
@@ -80,11 +72,11 @@ impl Cpu {
                 6
             }
 
-            0xB1 => {
+            0xA5 => {
                 let data = get_byte(&rom, &mut self.pc);
-                let (opop, add_cycle) = izy(&ram, data, self.y);
+                let opop = zp(data);
                 lda(self, &ram, opop);
-                5 + add_cycle as u8
+                3
             }
 
             0xAD => {
@@ -94,11 +86,18 @@ impl Cpu {
                 4
             }
 
-            0xBD => {
-                let data = get_word(&rom, &mut self.pc);
-                let (opop, add_cycle) = abx(data, self.x);
+            0xB1 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let (opop, add_cycle) = izy(&ram, data, self.y);
                 lda(self, &ram, opop);
-                4 + add_cycle as u8
+                5 + add_cycle as u8
+            }
+
+            0xB5 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zpx(data, self.x);
+                lda(self, &ram, opop);
+                4
             }
 
             0xB9 => {
@@ -108,14 +107,68 @@ impl Cpu {
                 4 + add_cycle as u8
             }
 
-            // STA
-            0x81 => {
-                let data = get_byte(&rom, &mut self.pc);
-                let opop = izx(&ram, data, self.x);
-                sta(&self, ram, opop);
-                6
+            0xBD => {
+                let data = get_word(&rom, &mut self.pc);
+                let (opop, add_cycle) = abx(data, self.x);
+                lda(self, &ram, opop);
+                4 + add_cycle as u8
             }
 
+            0xC1 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = izx(&ram, data, self.x);
+                cmp(self, &ram, opop);
+                4
+            }
+
+            0xC5 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zp(data);
+                cmp(self, &ram, opop);
+                4
+            }
+
+            0xC9 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                cmp(self, &ram, opop);
+                4
+            }
+
+            0xCD => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                cmp(self, &ram, opop);
+                4
+            }
+
+            0xD1 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let (opop, add_cycle) = izy(&ram, data, self.x);
+                cmp(self, &ram, opop);
+                4 + add_cycle as u8
+            }
+
+            0xD5 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zpx(data, self.x);
+                cmp(self, &ram, opop);
+                4
+            }
+
+            0xD9 => {
+                let data = get_word(&rom, &mut self.pc);
+                let (opop, add_cycle) = aby(data, self.y);
+                cmp(self, &ram, opop);
+                4 + add_cycle as u8
+            }
+
+            0xDD => {
+                let data = get_word(&rom, &mut self.pc);
+                let (opop, add_cycle) = abx(data, self.x);
+                cmp(self, &ram, opop);
+                4 + add_cycle as u8
+            }
             // Shouldn't ever happen. If it does... well, yuh dun fuck'd son
             // NOTE: can use unreachable!() to tell the compiler this ^
             _ => {

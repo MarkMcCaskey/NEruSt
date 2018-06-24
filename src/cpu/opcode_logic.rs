@@ -373,3 +373,31 @@ fn asl(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
+
+/// logic
+
+pub fn cmp(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
+    use std::cmp::Ordering;
+    let value = match opop {
+        OpcodeOperand::Address(addr) => ram.data[addr as usize],
+        OpcodeOperand::Immediate(imm) => imm,
+        OpcodeOperand::Implied => unreachable!("Cmp doesn't have a default to compare to"),
+    };
+    match cpu.acc.cmp(&value) {
+        Ordering::Equal => {
+            cpu.set_flag_value(ProcessorStatusFlag::Negative, false);
+            cpu.set_flag_value(ProcessorStatusFlag::Zero, true);
+            cpu.set_flag_value(ProcessorStatusFlag::Carry, true);
+        }
+        Ordering::Greater => {
+            cpu.set_flag_value(ProcessorStatusFlag::Negative, true);
+            cpu.set_flag_value(ProcessorStatusFlag::Zero, false);
+            cpu.set_flag_value(ProcessorStatusFlag::Carry, false);
+        }
+        Ordering::Less => {
+            cpu.set_flag_value(ProcessorStatusFlag::Negative, false);
+            cpu.set_flag_value(ProcessorStatusFlag::Zero, false);
+            cpu.set_flag_value(ProcessorStatusFlag::Carry, true);
+        }
+    }
+}

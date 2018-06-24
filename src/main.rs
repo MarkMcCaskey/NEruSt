@@ -21,7 +21,7 @@ fn main() {
     };
 
     let rom = Rom::from_file(settings.rom_file).expect("Could not read ROM from file");
-    loop {
+    while !cpu.halt {
         cpu.run_instruction(&mut ram, &rom);
     }
 }

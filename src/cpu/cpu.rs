@@ -10,6 +10,9 @@ pub struct Cpu {
     /// process status register
     pub p: u8,
     pub pc: u16,
+    /// Whether the CPU is running
+    // TODO: when set data bus returns $FF
+    pub halt: bool,
 }
 
 #[repr(u8)]
@@ -34,6 +37,7 @@ impl Cpu {
             y: 0,
             p: 0,
             pc: 0,
+            halt: false,
         }
     }
 
@@ -705,6 +709,13 @@ impl Cpu {
                 inc(self, ram, opop);
                 4 + add_cycle as u8
             }
+            0x02 | 0x12 | 0x22 | 0x32 | 0x42 | 0x52 | 0x62 | 0x72 | 0x92 | 0xB2 | 0xD2 | 0xF2 => {
+                self.halt = true;
+                4
+            }
+            0x1A | 0x3A | 0x5A | 0x7A | 0x80 | 0x82 | 0x89 | 0xC2 | 0xDA | 0xE2 | 0xEA | 0xFA => 2,
+            0x04 | 0x44 | 0x64 => 3,
+            0x0C | 0x14 | 0x1C | 0x34 | 0x3C | 0x54 | 0x5C | 0x74 | 0x7C | 0xD4 | 0xDC | 0xF4 => 4,
 
             // Shouldn't ever happen. If it does... well, yuh dun fuck'd son
             // NOTE: can use unreachable!() to tell the compiler this ^

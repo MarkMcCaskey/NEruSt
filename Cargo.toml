@@ -5,3 +5,4 @@ authors = ["Akourne Burschtein", "Mark McCaskey"]
 
 [dependencies]
 sdl2 = "0.31.0"
+clap = "^2.31"

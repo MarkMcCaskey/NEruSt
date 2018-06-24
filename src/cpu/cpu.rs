@@ -708,8 +708,9 @@ impl Cpu {
 
             // Shouldn't ever happen. If it does... well, yuh dun fuck'd son
             // NOTE: can use unreachable!() to tell the compiler this ^
-            _ => {
-                unreachable!();
+            otherwise => {
+                //unreachable!();
+                panic!("Opcode 0x{:X} has not yet been implemented", otherwise);
                 255
             }
         }

@@ -209,7 +209,7 @@ pub fn iny(cpu: &mut Cpu) {
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Math opcodes
-fn adc(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
+pub fn adc(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
     let old_acc: u8 = cpu.acc;
     let val: u8 = match opop {
         OpcodeOperand::Implied => {
@@ -237,7 +237,7 @@ fn adc(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
 }
 
-fn sbc(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
+pub fn sbc(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
     let old_acc: u8 = cpu.acc;
     let val: u8 = match opop {
         OpcodeOperand::Implied => {
@@ -268,7 +268,7 @@ fn sbc(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Shift opcodes
-fn rol(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
+pub fn rol(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
         OpcodeOperand::Implied => {
             let old_val = cpu.acc;
@@ -295,7 +295,7 @@ fn rol(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-fn ror(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
+pub fn ror(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
         OpcodeOperand::Implied => {
             let old_val = cpu.acc;
@@ -322,7 +322,7 @@ fn ror(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-fn lsr(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
+pub fn lsr(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
         OpcodeOperand::Implied => {
             let old_val = cpu.acc;
@@ -348,7 +348,7 @@ fn lsr(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-fn asl(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
+pub fn asl(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
         OpcodeOperand::Implied => {
             let old_val = cpu.acc;

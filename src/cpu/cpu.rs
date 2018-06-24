@@ -142,6 +142,13 @@ impl Cpu {
                 4
             }
 
+            0xC6 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zp(data);
+                dec(self, ram, opop);
+                4
+            }
+
             0xC9 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = imm(data);
@@ -163,6 +170,13 @@ impl Cpu {
                 4
             }
 
+            0xCE => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                dec(self, ram, opop);
+                4
+            }
+
             0xD1 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let (opop, add_cycle) = izy(&ram, data, self.x);
@@ -174,6 +188,13 @@ impl Cpu {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = zpx(data, self.x);
                 cmp(self, &ram, opop);
+                4
+            }
+
+            0xD6 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zpx(data, self.x);
+                dec(self, ram, opop);
                 4
             }
 
@@ -191,6 +212,13 @@ impl Cpu {
                 4 + add_cycle as u8
             }
 
+            0xDE => {
+                let data = get_word(&rom, &mut self.pc);
+                let (opop, add_cycle) = abx(data, self.x);
+                dec(self, ram, opop);
+                4 + add_cycle as u8
+            }
+
             0xE0 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = imm(data);
@@ -205,12 +233,41 @@ impl Cpu {
                 4
             }
 
+            0xE6 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zp(data);
+                inc(self, ram, opop);
+                4
+            }
+
             0xEC => {
                 let data = get_word(&rom, &mut self.pc);
                 let opop = abs(data);
                 cpx(self, &ram, opop);
                 4
             }
+
+            0xEE => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                inc(self, ram, opop);
+                4
+            }
+
+            0xF6 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zpx(data, self.x);
+                inc(self, ram, opop);
+                4
+            }
+
+            0xFE => {
+                let data = get_word(&rom, &mut self.pc);
+                let (opop, add_cycle) = abx(data, self.x);
+                inc(self, ram, opop);
+                4 + add_cycle as u8
+            }
+
             // Shouldn't ever happen. If it does... well, yuh dun fuck'd son
             // NOTE: can use unreachable!() to tell the compiler this ^
             _ => {

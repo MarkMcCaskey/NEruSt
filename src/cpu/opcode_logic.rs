@@ -409,7 +409,6 @@ pub fn cmp(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
 }
 
 pub fn cpx(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
-    use std::cmp::Ordering;
     let value = match opop {
         OpcodeOperand::Address(addr) => ram.data[addr as usize],
         OpcodeOperand::Immediate(imm) => imm,
@@ -420,7 +419,6 @@ pub fn cpx(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
 }
 
 pub fn cpy(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
-    use std::cmp::Ordering;
     let value = match opop {
         OpcodeOperand::Address(addr) => ram.data[addr as usize],
         OpcodeOperand::Immediate(imm) => imm,
@@ -428,4 +426,32 @@ pub fn cpy(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
     };
     let first_val = cpu.y;
     common_cmp(cpu, first_val, value)
+}
+
+pub fn dec(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
+    let new_value = match opop {
+        OpcodeOperand::Address(addr) => {
+            ram.data[addr as usize] = ram.data[addr as usize].wrapping_sub(1);
+            ram.data[addr as usize]
+        }
+        OpcodeOperand::Immediate(_) => unreachable!("immediate values cannot be decremented"),
+        OpcodeOperand::Implied => unreachable!("dec doesn't have a default"),
+    };
+
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, new_value == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, new_value & 0x80 == 0x80);
+}
+
+pub fn inc(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
+    let new_value = match opop {
+        OpcodeOperand::Address(addr) => {
+            ram.data[addr as usize] = ram.data[addr as usize].wrapping_add(1);
+            ram.data[addr as usize]
+        }
+        OpcodeOperand::Immediate(_) => unreachable!("immediate values cannot be decremented"),
+        OpcodeOperand::Implied => unreachable!("dec doesn't have a default"),
+    };
+
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, new_value == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, new_value & 0x80 == 0x80);
 }

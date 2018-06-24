@@ -376,14 +376,10 @@ fn asl(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
 
 /// logic
 
-pub fn cmp(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
+/// Function that implements the flag setting logic of `cmp`, `cpx`, and `cpy`
+fn common_cmp(cpu: &mut Cpu, first: u8, second: u8) {
     use std::cmp::Ordering;
-    let value = match opop {
-        OpcodeOperand::Address(addr) => ram.data[addr as usize],
-        OpcodeOperand::Immediate(imm) => imm,
-        OpcodeOperand::Implied => unreachable!("Cmp doesn't have a default to compare to"),
-    };
-    match cpu.acc.cmp(&value) {
+    match first.cmp(&second) {
         Ordering::Equal => {
             cpu.set_flag_value(ProcessorStatusFlag::Negative, false);
             cpu.set_flag_value(ProcessorStatusFlag::Zero, true);
@@ -400,4 +396,36 @@ pub fn cmp(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
             cpu.set_flag_value(ProcessorStatusFlag::Carry, true);
         }
     }
+}
+
+pub fn cmp(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
+    let value = match opop {
+        OpcodeOperand::Address(addr) => ram.data[addr as usize],
+        OpcodeOperand::Immediate(imm) => imm,
+        OpcodeOperand::Implied => unreachable!("Cmp doesn't have a default to compare to"),
+    };
+    let first_val = cpu.acc;
+    common_cmp(cpu, first_val, value)
+}
+
+pub fn cpx(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
+    use std::cmp::Ordering;
+    let value = match opop {
+        OpcodeOperand::Address(addr) => ram.data[addr as usize],
+        OpcodeOperand::Immediate(imm) => imm,
+        OpcodeOperand::Implied => unreachable!("cpx doesn't have a default to compare to"),
+    };
+    let first_val = cpu.x;
+    common_cmp(cpu, first_val, value)
+}
+
+pub fn cpy(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
+    use std::cmp::Ordering;
+    let value = match opop {
+        OpcodeOperand::Address(addr) => ram.data[addr as usize],
+        OpcodeOperand::Immediate(imm) => imm,
+        OpcodeOperand::Implied => unreachable!("cpy doesn't have a default to compare to"),
+    };
+    let first_val = cpu.y;
+    common_cmp(cpu, first_val, value)
 }

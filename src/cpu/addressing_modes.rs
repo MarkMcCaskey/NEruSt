@@ -6,14 +6,17 @@ pub enum OpcodeOperand {
     Address(u16),
 }
 
+#[inline(always)]
 pub fn imp() -> OpcodeOperand {
     OpcodeOperand::Implied
 }
 
+#[inline(always)]
 pub fn imm(val: u8) -> OpcodeOperand {
     OpcodeOperand::Immediate(val)
 }
 
+#[inline(always)]
 pub fn zp(adr: u8) -> OpcodeOperand {
     OpcodeOperand::Address(adr as u16)
 }

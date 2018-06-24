@@ -114,10 +114,24 @@ impl Cpu {
                 4 + add_cycle as u8
             }
 
+            0xC0 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                cpy(self, &ram, opop);
+                4
+            }
+
             0xC1 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = izx(&ram, data, self.x);
                 cmp(self, &ram, opop);
+                4
+            }
+
+            0xC4 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zp(data);
+                cpy(self, &ram, opop);
                 4
             }
 
@@ -132,6 +146,13 @@ impl Cpu {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = imm(data);
                 cmp(self, &ram, opop);
+                4
+            }
+
+            0xCC => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                cpy(self, &ram, opop);
                 4
             }
 
@@ -168,6 +189,27 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 cmp(self, &ram, opop);
                 4 + add_cycle as u8
+            }
+
+            0xE0 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                cpx(self, &ram, opop);
+                4
+            }
+
+            0xE4 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zp(data);
+                cpx(self, &ram, opop);
+                4
+            }
+
+            0xEC => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                cpx(self, &ram, opop);
+                4
             }
             // Shouldn't ever happen. If it does... well, yuh dun fuck'd son
             // NOTE: can use unreachable!() to tell the compiler this ^

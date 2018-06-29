@@ -424,9 +424,110 @@ impl Cpu {
                 6
             }
 
+            0x84 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zp(data);
+                sty(self, ram, opop);
+                3
+            }
+
+            0x85 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zp(data);
+                sta(self, ram, opop);
+                3
+            }
+
+            0x86 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zp(data);
+                stx(self, ram, opop);
+                4
+            }
+
             0x88 => {
                 dey(self);
                 4
+            }
+
+            0x8A => {
+                txa(self);
+                2
+            }
+
+            0x8C => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                sty(self, ram, opop);
+                4
+            }
+
+            0x8D => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                sta(self, ram, opop);
+                4
+            }
+
+            0x8E => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                stx(self, ram, opop);
+                4
+            }
+
+            0x91 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let (opop, add_cycle) = izy(&ram, data, self.y);
+                sta(self, ram, opop);
+                5 + add_cycle as u8
+            }
+
+            0x94 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zpx(data, self.x);
+                sty(self, ram, opop);
+                4
+            }
+
+            0x95 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zpx(data, self.x);
+                sta(self, ram, opop);
+                4
+            }
+
+            0x96 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zpy(data, self.y);
+                stx(self, ram, opop);
+                4
+            }
+
+            0x98 => {
+                tya(self);
+                2
+            }
+
+            0x99 => {
+                let data = get_word(&rom, &mut self.pc);
+                let (opop, add_cycle) = aby(data, self.y);
+                sta(self, ram, opop);
+                4 + add_cycle as u8
+            }
+
+            0x9D => {
+                let data = get_word(&rom, &mut self.pc);
+                let (opop, add_cycle) = abx(data, self.x);
+                sta(self, ram, opop);
+                4 + add_cycle as u8
+            }
+
+            0xA0 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                ldy(self, &ram, opop);
+                2
             }
 
             0xA1 => {
@@ -436,11 +537,37 @@ impl Cpu {
                 6
             }
 
+            0xA2 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                ldx(self, &ram, opop);
+                2
+            }
+
+            0xA4 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zp(data);
+                ldy(self, &ram, opop);
+                3
+            }
+
             0xA5 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = zp(data);
                 lda(self, &ram, opop);
                 3
+            }
+
+            0xA6 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zp(data);
+                ldx(self, &ram, opop);
+                3
+            }
+
+            0xA8 => {
+                tay(self);
+                2
             }
 
             0xA9 => {
@@ -450,10 +577,29 @@ impl Cpu {
                 2
             }
 
+            0xAA => {
+                tax(self);
+                2
+            }
+
+            0xAD => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                ldy(self, &ram, opop);
+                4
+            }
+
             0xAD => {
                 let data = get_word(&rom, &mut self.pc);
                 let opop = abs(data);
                 lda(self, &ram, opop);
+                4
+            }
+
+            0xAE => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                ldx(self, &ram, opop);
                 4
             }
 
@@ -464,10 +610,24 @@ impl Cpu {
                 5 + add_cycle as u8
             }
 
+            0xB4 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zpx(data, self.x);
+                ldy(self, &ram, opop);
+                4
+            }
+
             0xB5 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = zpx(data, self.x);
                 lda(self, &ram, opop);
+                4
+            }
+
+            0xB6 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zpy(data, self.y);
+                ldx(self, ram, opop);
                 4
             }
 
@@ -478,10 +638,24 @@ impl Cpu {
                 4 + add_cycle as u8
             }
 
+            0xBC => {
+                let data = get_word(&rom, &mut self.pc);
+                let (opop, add_cycle) = abx(data, self.x);
+                ldy(self, &ram, opop);
+                4 + add_cycle as u8
+            }
+
             0xBD => {
                 let data = get_word(&rom, &mut self.pc);
                 let (opop, add_cycle) = abx(data, self.x);
                 lda(self, &ram, opop);
+                4 + add_cycle as u8
+            }
+
+            0xBE => {
+                let data = get_word(&rom, &mut self.pc);
+                let (opop, add_cycle) = aby(data, self.y);
+                ldx(self, &ram, opop);
                 4 + add_cycle as u8
             }
 

@@ -506,3 +506,128 @@ pub fn inc(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Zero, new_value == 0);
     cpu.set_flag_value(ProcessorStatusFlag::Negative, new_value & 0x80 == 0x80);
 }
+
+// Branching
+pub fn bpl(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+    let negative = cpu.get_processor_status_flag(ProcessorStatusFlag::Negative);
+    if !negative {
+        match opop {
+            OpcodeOperand::Immediate(v) => {
+                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
+            }
+            _ => unreachable!("invalid bpl argument"),
+        }
+    }
+
+    !negative
+}
+
+pub fn bmi(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+    let negative = cpu.get_processor_status_flag(ProcessorStatusFlag::Negative);
+    if negative {
+        match opop {
+            OpcodeOperand::Immediate(v) => {
+                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
+            }
+            _ => unreachable!("invalid bmi argument"),
+        }
+    }
+
+    negative
+}
+
+pub fn bvc(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+    let overflow = cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow);
+    if !overflow {
+        match opop {
+            OpcodeOperand::Immediate(v) => {
+                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
+            }
+            _ => unreachable!("invalid bvc argument"),
+        }
+    }
+
+    !overflow
+}
+
+pub fn bvs(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+    let overflow = cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow);
+    if overflow {
+        match opop {
+            OpcodeOperand::Immediate(v) => {
+                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
+            }
+            _ => unreachable!("invalid bvs argument"),
+        }
+    }
+
+    overflow
+}
+
+pub fn bcc(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+    let carry = cpu.get_processor_status_flag(ProcessorStatusFlag::Carry);
+    if !carry {
+        match opop {
+            OpcodeOperand::Immediate(v) => {
+                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
+            }
+            _ => unreachable!("invalid bcc argument"),
+        }
+    }
+
+    !carry
+}
+
+pub fn bcs(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+    let carry = cpu.get_processor_status_flag(ProcessorStatusFlag::Carry);
+    if carry {
+        match opop {
+            OpcodeOperand::Immediate(v) => {
+                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
+            }
+            _ => unreachable!("invalid bcs argument"),
+        }
+    }
+
+    carry
+}
+
+pub fn bne(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+    let zero = cpu.get_processor_status_flag(ProcessorStatusFlag::Zero);
+    if !zero {
+        match opop {
+            OpcodeOperand::Immediate(v) => {
+                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
+            }
+            _ => unreachable!("invalid bne argument"),
+        }
+    }
+
+    !zero
+}
+
+pub fn beq(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+    let zero = cpu.get_processor_status_flag(ProcessorStatusFlag::Zero);
+    if zero {
+        match opop {
+            OpcodeOperand::Immediate(v) => {
+                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
+            }
+            _ => unreachable!("invalid beq argument"),
+        }
+    }
+
+    zero
+}
+
+// TODO: this function is probably wrong
+pub fn brk(cpu: &mut Cpu, ram: &mut Ram) {
+    cpu.set_flag_value(ProcessorStatusFlag::Interrupt, true);
+    cpu.set_flag_value(ProcessorStatusFlag::Break, true);
+    let idx = cpu.s as usize;
+    ram.data[idx] = cpu.pc as u8;
+    ram.data[idx.wrapping_sub(1)] = (cpu.pc >> 8) as u8;
+    ram.data[idx.wrapping_sub(2)] = cpu.p;
+    cpu.s = cpu.s.wrapping_sub(3);
+    cpu.pc = ram.data[0xFFFE] as u16 | ((ram.data[0xFFFF] as u16) << 8);
+}

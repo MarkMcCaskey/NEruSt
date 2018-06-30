@@ -58,6 +58,11 @@ impl Cpu {
     pub fn run_instruction(&mut self, ram: &mut Ram, rom: &Rom) -> u8 {
         let op = get_byte(&rom, &mut self.pc);
         match op {
+            0x00 => {
+                brk(self, ram);
+                7
+            }
+
             0x01 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = izx(&ram, data, self.x);
@@ -111,6 +116,13 @@ impl Cpu {
                 let opop = abs(data);
                 asl(self, ram, opop);
                 4
+            }
+
+            0x10 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                let result = bpl(self, opop);
+                2 + result as u8 // + page boundary crossed
             }
 
             0x11 => {
@@ -208,6 +220,13 @@ impl Cpu {
                 4
             }
 
+            0x30 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                let result = bmi(self, opop);
+                2 + result as u8 // + page boundary crossed
+            }
+
             0x31 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let (opop, add_cycle) = izy(&ram, data, self.y);
@@ -303,6 +322,13 @@ impl Cpu {
                 4
             }
 
+            0x50 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                let result = bvc(self, opop);
+                2 + result as u8 // + page boundary crossed
+            }
+
             0x51 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let (opop, add_cycle) = izy(&ram, data, self.y);
@@ -396,6 +422,13 @@ impl Cpu {
                 let opop = abs(data);
                 ror(self, ram, opop);
                 4
+            }
+
+            0x70 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                let result = bvs(self, opop);
+                2 + result as u8 // + page boundary crossed
             }
 
             0x71 => {
@@ -497,6 +530,13 @@ impl Cpu {
                 let opop = abs(data);
                 stx(self, ram, opop);
                 4
+            }
+
+            0x90 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                let result = bcc(self, opop);
+                2 + result as u8 // + page boundary crossed
             }
 
             0x91 => {
@@ -629,6 +669,13 @@ impl Cpu {
                 let opop = abs(data);
                 ldx(self, &ram, opop);
                 4
+            }
+
+            0xB0 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                let result = bcs(self, opop);
+                2 + result as u8 // + page boundary crossed
             }
 
             0xB1 => {
@@ -765,6 +812,13 @@ impl Cpu {
                 4
             }
 
+            0xD0 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                let result = bne(self, opop);
+                2 + result as u8 // + page boundary crossed
+            }
+
             0xD1 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let (opop, add_cycle) = izy(&ram, data, self.x);
@@ -873,6 +927,13 @@ impl Cpu {
                 let opop = abs(data);
                 inc(self, ram, opop);
                 4
+            }
+
+            0xF0 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = imm(data);
+                let result = beq(self, opop);
+                2 + result as u8 // + page boundary crossed
             }
 
             0xF1 => {

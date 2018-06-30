@@ -17,7 +17,7 @@ fn main() {
 
     let mut cpu = Cpu::new();
     let mut ram = Ram {
-        data: vec![0u8; 0xFFFF],
+        data: vec![0u8; 0x10000],
     };
 
     let rom = Rom::from_file(settings.rom_file).expect("Could not read ROM from file");

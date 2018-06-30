@@ -10,6 +10,8 @@ pub struct Cpu {
     /// process status register
     pub p: u8,
     pub pc: u16,
+    /// stack pointer
+    pub s: u8,
     /// Whether the CPU is running
     // TODO: when set data bus returns $FF
     pub halt: bool,
@@ -35,8 +37,9 @@ impl Cpu {
             acc: 0,
             x: 0,
             y: 0,
-            p: 0,
+            p: 0x34,
             pc: 0,
+            s: 0xFD,
             halt: false,
         }
     }
@@ -76,6 +79,11 @@ impl Cpu {
                 let opop = zp(data);
                 asl(self, ram, opop);
                 4
+            }
+
+            0x08 => {
+                php(self, ram);
+                3
             }
 
             0x09 => {
@@ -165,6 +173,11 @@ impl Cpu {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = zp(data);
                 rol(self, ram, opop);
+                4
+            }
+
+            0x28 => {
+                plp(self, ram);
                 4
             }
 
@@ -258,6 +271,11 @@ impl Cpu {
                 4
             }
 
+            0x48 => {
+                pha(self, ram);
+                3
+            }
+
             0x49 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = imm(data);
@@ -345,6 +363,11 @@ impl Cpu {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = zp(data);
                 ror(self, ram, opop);
+                4
+            }
+
+            0x68 => {
+                pla(self, ram);
                 4
             }
 
@@ -516,6 +539,11 @@ impl Cpu {
                 4 + add_cycle as u8
             }
 
+            0x9A => {
+                txs(self);
+                2
+            }
+
             0x9D => {
                 let data = get_word(&rom, &mut self.pc);
                 let (opop, add_cycle) = abx(data, self.x);
@@ -636,6 +664,11 @@ impl Cpu {
                 let (opop, add_cycle) = aby(data, self.y);
                 lda(self, &ram, opop);
                 4 + add_cycle as u8
+            }
+
+            0xBA => {
+                tsx(self);
+                2
             }
 
             0xBC => {

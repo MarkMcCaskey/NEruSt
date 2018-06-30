@@ -173,6 +173,57 @@ pub fn tya(cpu: &mut Cpu) {
 
     let is_zero = cpu.y == 0;
     cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
+    // TODO: set Negative flag for these instructions
+}
+
+// TODO: verify the indexing of tsx and txs is correct
+// is it immediate? if so why do the docs call x an index?
+pub fn tsx(cpu: &mut Cpu) {
+    cpu.x = cpu.s;
+
+    let is_zero = cpu.s == 0;
+    let is_neg = (cpu.s as i8) < 0;
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, is_zero);
+}
+
+pub fn txs(cpu: &mut Cpu) {
+    cpu.s = cpu.x;
+}
+
+pub fn pla(cpu: &mut Cpu, ram: &mut Ram) {
+    cpu.s += 1;
+    let idx = cpu.s as usize;
+    cpu.acc = ram.data[idx];
+
+    let is_zero = cpu.acc == 0;
+    let is_neg = (cpu.acc as i8) < 0;
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, is_zero);
+}
+
+pub fn pha(cpu: &mut Cpu, ram: &mut Ram) {
+    let idx = cpu.s as usize;
+    ram.data[idx] = cpu.acc;
+    cpu.s -= 1;
+
+    let is_zero = cpu.acc == 0;
+    let is_neg = (cpu.acc as i8) < 0;
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, is_zero);
+}
+
+// Note: inconsistent documentation.  Some say that B flag is not affected by this, others say it's the only way
+pub fn plp(cpu: &mut Cpu, ram: &mut Ram) {
+    cpu.s += 1;
+    let idx = cpu.s as usize;
+    cpu.p = ram.data[idx];
+}
+
+pub fn php(cpu: &mut Cpu, ram: &mut Ram) {
+    let idx = cpu.s as usize;
+    ram.data[idx] = cpu.p;
+    cpu.s -= 1;
 }
 
 //////////////////////////////////////////////////

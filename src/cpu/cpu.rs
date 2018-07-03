@@ -146,6 +146,11 @@ impl Cpu {
                 4
             }
 
+            0x18 => {
+                clc(self);
+                2
+            }
+
             0x19 => {
                 let data = get_word(&rom, &mut self.pc);
                 let (opop, add_cycle) = aby(data, self.y);
@@ -167,11 +172,25 @@ impl Cpu {
                 4 + add_cycle as u8
             }
 
+            0x20 => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                jsr(self, ram, opop);
+                6
+            }
+
             0x21 => {
                 let data = get_byte(&rom, &mut self.pc);
                 let opop = izx(&ram, data, self.x);
                 and(self, &ram, opop);
                 6
+            }
+
+            0x24 => {
+                let data = get_byte(&rom, &mut self.pc);
+                let opop = zp(data);
+                bit(self, opop);
+                3
             }
 
             0x25 => {
@@ -206,6 +225,12 @@ impl Cpu {
                 4
             }
 
+            0x2C => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                bit(self, opop);
+                4
+            }
             0x2D => {
                 let data = get_word(&rom, &mut self.pc);
                 let opop = abs(data);
@@ -246,6 +271,11 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 rol(self, ram, opop);
                 4
+            }
+
+            0x38 => {
+                sec(self);
+                2
             }
 
             0x39 => {
@@ -308,6 +338,13 @@ impl Cpu {
                 4
             }
 
+            0x4C => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = abs(data);
+                jmp(self, opop);
+                3
+            }
+
             0x4D => {
                 let data = get_word(&rom, &mut self.pc);
                 let opop = abs(data);
@@ -350,6 +387,11 @@ impl Cpu {
                 4
             }
 
+            0x58 => {
+                cli(self);
+                2
+            }
+
             0x59 => {
                 let data = get_word(&rom, &mut self.pc);
                 let (opop, add_cycle) = aby(data, self.y);
@@ -369,6 +411,11 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 lsr(self, ram, opop);
                 4 + add_cycle as u8
+            }
+
+            0x60 => {
+                rts(self, ram);
+                6
             }
 
             0x61 => {
@@ -408,6 +455,13 @@ impl Cpu {
                 let opop = imp();
                 ror(self, ram, opop);
                 4
+            }
+
+            0x6C => {
+                let data = get_word(&rom, &mut self.pc);
+                let opop = ind(ram, data);
+                jmp(self, opop);
+                5
             }
 
             0x6D => {
@@ -450,6 +504,11 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 ror(self, ram, opop);
                 4
+            }
+
+            0x78 => {
+                sei(self);
+                2
             }
 
             0x79 => {
@@ -706,6 +765,11 @@ impl Cpu {
                 4
             }
 
+            0xB8 => {
+                clv(self);
+                2
+            }
+
             0xB9 => {
                 let data = get_word(&rom, &mut self.pc);
                 let (opop, add_cycle) = aby(data, self.y);
@@ -840,6 +904,11 @@ impl Cpu {
                 4
             }
 
+            0xD8 => {
+                cld(self);
+                2
+            }
+
             0xD9 => {
                 let data = get_word(&rom, &mut self.pc);
                 let (opop, add_cycle) = aby(data, self.y);
@@ -955,6 +1024,11 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 inc(self, ram, opop);
                 4
+            }
+
+            0xF8 => {
+                sed(self);
+                2
             }
 
             0xF9 => {

@@ -631,3 +631,51 @@ pub fn brk(cpu: &mut Cpu, ram: &mut Ram) {
     cpu.s = cpu.s.wrapping_sub(3);
     cpu.pc = ram.data[0xFFFE] as u16 | ((ram.data[0xFFFF] as u16) << 8);
 }
+
+pub fn rti(cpu: &mut Cpu, ram: &Ram) {
+    let idx = cpu.s as usize;
+    cpu.p = ram.data[idx + 1];
+    cpu.pc = (ram.data[idx + 2] as u16 | ((ram.data[idx + 3] as u16) << 8));
+    cpu.s += 3;
+}
+
+pub fn jsr(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
+    let idx = cpu.s as usize;
+    ram.data[idx] = cpu.pc as u8;
+    ram.data[idx - 1] = (cpu.pc >> 8) as u8;
+    cpu.s -= 2;
+    match opop {
+        OpcodeOperand::Address(addr) => {
+            cpu.pc = addr;
+        }
+        _ => unreachable!(),
+    }
+}
+
+pub fn rts(cpu: &mut Cpu, ram: &Ram) {
+    let idx = cpu.s as usize;
+    cpu.pc = (ram.data[idx + 1] as u16 | ((ram.data[idx + 2] as u16) << 8));
+    cpu.s += 2;
+}
+
+pub fn jmp(cpu: &mut Cpu, opop: OpcodeOperand) {
+    match opop {
+        OpcodeOperand::Address(addr) => {
+            cpu.pc = addr;
+        }
+        _ => unreachable!(),
+    }
+}
+
+//review this, notation used was weird
+pub fn bit(cpu: &mut Cpu, opop: OpcodeOperand) {
+    let acc = cpu.acc as u16;
+    match opop {
+        OpcodeOperand::Address(addr) => {
+            cpu.set_flag_value(ProcessorStatusFlag::Negative, ((addr >> 7) & 1 == 1));
+            cpu.set_flag_value(ProcessorStatusFlag::Overflow, ((addr >> 6) & 1) == 1);
+            cpu.set_flag_value(ProcessorStatusFlag::Zero, acc & addr == 0);
+        }
+        _ => unreachable!(),
+    }
+}

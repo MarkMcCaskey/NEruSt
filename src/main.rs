@@ -6,9 +6,7 @@ pub mod ram;
 pub mod rom;
 
 use args::Settings;
-use cpu::addressing_modes::*;
 use cpu::cpu::*;
-use cpu::opcode_logic::*;
 use ram::ram::*;
 use rom::rom::*;
 

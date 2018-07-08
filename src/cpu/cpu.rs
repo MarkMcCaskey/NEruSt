@@ -729,13 +729,6 @@ impl Cpu {
                 4
             }
 
-            0xAD => {
-                let data = get_word(&rom, &mut self.pc);
-                let opop = abs(data);
-                lda(self, &ram, opop);
-                4
-            }
-
             0xAE => {
                 let data = get_word(&rom, &mut self.pc);
                 let opop = abs(data);
@@ -1075,9 +1068,7 @@ impl Cpu {
             // Shouldn't ever happen. If it does... well, yuh dun fuck'd son
             // NOTE: can use unreachable!() to tell the compiler this ^
             otherwise => {
-                //unreachable!();
                 panic!("Opcode 0x{:X} has not yet been implemented", otherwise);
-                255
             }
         }
     }

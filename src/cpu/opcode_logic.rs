@@ -184,7 +184,7 @@ pub fn tsx(cpu: &mut Cpu) {
     let is_zero = cpu.s == 0;
     let is_neg = (cpu.s as i8) < 0;
     cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
-    cpu.set_flag_value(ProcessorStatusFlag::Negative, is_zero);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, is_neg);
 }
 
 pub fn txs(cpu: &mut Cpu) {
@@ -199,18 +199,13 @@ pub fn pla(cpu: &mut Cpu, ram: &mut Ram) {
     let is_zero = cpu.acc == 0;
     let is_neg = (cpu.acc as i8) < 0;
     cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
-    cpu.set_flag_value(ProcessorStatusFlag::Negative, is_zero);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, is_neg);
 }
 
 pub fn pha(cpu: &mut Cpu, ram: &mut Ram) {
     let idx = cpu.s as usize;
     ram.data[idx] = cpu.acc;
     cpu.s -= 1;
-
-    let is_zero = cpu.acc == 0;
-    let is_neg = (cpu.acc as i8) < 0;
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
-    cpu.set_flag_value(ProcessorStatusFlag::Negative, is_zero);
 }
 
 // Note: inconsistent documentation.  Some say that B flag is not affected by this, others say it's the only way
@@ -263,10 +258,7 @@ pub fn iny(cpu: &mut Cpu) {
 pub fn adc(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
     let old_acc: u8 = cpu.acc;
     let val: u8 = match opop {
-        OpcodeOperand::Implied => {
-            unreachable!();
-            0
-        }
+        OpcodeOperand::Implied => unreachable!(),
         OpcodeOperand::Immediate(val) => {
             cpu.acc.wrapping_add(val);
             val
@@ -291,10 +283,7 @@ pub fn adc(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
 pub fn sbc(cpu: &mut Cpu, ram: &Ram, opop: OpcodeOperand) {
     let old_acc: u8 = cpu.acc;
     let val: u8 = match opop {
-        OpcodeOperand::Implied => {
-            unreachable!();
-            0
-        }
+        OpcodeOperand::Implied => unreachable!(),
         OpcodeOperand::Immediate(val) => {
             cpu.acc.wrapping_sub(val);
             val
@@ -323,17 +312,16 @@ pub fn rol(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
         OpcodeOperand::Implied => {
             let old_val = cpu.acc;
-            cpu.acc << 1 | cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
+            cpu.acc <<= 1;
+            cpu.acc |= cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
             (old_val, cpu.acc)
         }
-        OpcodeOperand::Immediate(val) => {
-            unreachable!();
-            (0, 0)
-        }
+        OpcodeOperand::Immediate(_) => unreachable!(),
         OpcodeOperand::Address(adr) => {
             let old_val = ram.data[adr as usize];
-            ram.data[adr as usize] << 1
-                | cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
+            ram.data[adr as usize] <<= 1;
+            ram.data[adr as usize] |=
+                cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
             (old_val, ram.data[adr as usize])
         }
     };
@@ -350,17 +338,16 @@ pub fn ror(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
         OpcodeOperand::Implied => {
             let old_val = cpu.acc;
-            cpu.acc >> 1 | cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
+            cpu.acc >>= 1;
+            cpu.acc |= cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
             (old_val, cpu.acc)
         }
-        OpcodeOperand::Immediate(val) => {
-            unreachable!();
-            (0, 0)
-        }
+        OpcodeOperand::Immediate(_) => unreachable!(),
         OpcodeOperand::Address(adr) => {
             let old_val = ram.data[adr as usize];
-            ram.data[adr as usize] >> 1
-                | ((cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8) << 7);
+            ram.data[adr as usize] >>= 1;
+            ram.data[adr as usize] |=
+                (cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8) << 7;
             (old_val, ram.data[adr as usize])
         }
     };
@@ -377,16 +364,13 @@ pub fn lsr(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
         OpcodeOperand::Implied => {
             let old_val = cpu.acc;
-            cpu.acc >> 1;
+            cpu.acc >>= 1;
             (old_val, cpu.acc)
         }
-        OpcodeOperand::Immediate(val) => {
-            unreachable!();
-            (0, 0)
-        }
+        OpcodeOperand::Immediate(_) => unreachable!(),
         OpcodeOperand::Address(adr) => {
             let old_val = ram.data[adr as usize];
-            ram.data[adr as usize] >> 1;
+            ram.data[adr as usize] >>= 1;
             (old_val, ram.data[adr as usize])
         }
     };
@@ -403,16 +387,13 @@ pub fn asl(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
         OpcodeOperand::Implied => {
             let old_val = cpu.acc;
-            cpu.acc << 1;
+            cpu.acc <<= 1;
             (old_val, cpu.acc)
         }
-        OpcodeOperand::Immediate(val) => {
-            unreachable!();
-            (0, 0)
-        }
+        OpcodeOperand::Immediate(_) => unreachable!(),
         OpcodeOperand::Address(adr) => {
             let old_val = ram.data[adr as usize];
-            ram.data[adr as usize] << 1;
+            ram.data[adr as usize] <<= 1;
             (old_val, ram.data[adr as usize])
         }
     };
@@ -635,7 +616,7 @@ pub fn brk(cpu: &mut Cpu, ram: &mut Ram) {
 pub fn rti(cpu: &mut Cpu, ram: &Ram) {
     let idx = cpu.s as usize;
     cpu.p = ram.data[idx + 1];
-    cpu.pc = (ram.data[idx + 2] as u16 | ((ram.data[idx + 3] as u16) << 8));
+    cpu.pc = ram.data[idx + 2] as u16 | ((ram.data[idx + 3] as u16) << 8);
     cpu.s += 3;
 }
 
@@ -654,7 +635,7 @@ pub fn jsr(cpu: &mut Cpu, ram: &mut Ram, opop: OpcodeOperand) {
 
 pub fn rts(cpu: &mut Cpu, ram: &Ram) {
     let idx = cpu.s as usize;
-    cpu.pc = (ram.data[idx + 1] as u16 | ((ram.data[idx + 2] as u16) << 8));
+    cpu.pc = ram.data[idx + 1] as u16 | ((ram.data[idx + 2] as u16) << 8);
     cpu.s += 2;
 }
 
@@ -672,7 +653,7 @@ pub fn bit(cpu: &mut Cpu, opop: OpcodeOperand) {
     let acc = cpu.acc as u16;
     match opop {
         OpcodeOperand::Address(addr) => {
-            cpu.set_flag_value(ProcessorStatusFlag::Negative, ((addr >> 7) & 1 == 1));
+            cpu.set_flag_value(ProcessorStatusFlag::Negative, (addr >> 7) & 1 == 1);
             cpu.set_flag_value(ProcessorStatusFlag::Overflow, ((addr >> 6) & 1) == 1);
             cpu.set_flag_value(ProcessorStatusFlag::Zero, acc & addr == 0);
         }

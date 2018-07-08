@@ -23,7 +23,7 @@ impl Rom {
     pub fn from_file(rom_location: PathBuf) -> Result<Self, ::std::io::Error> {
         let mut output = Vec::with_capacity(DEFAULT_ROM_SIZE);
         let mut rom = File::open(rom_location)?;
-        rom.read_to_end(&mut output);
+        let _ = rom.read_to_end(&mut output);
 
         Ok(Self { data: output })
     }

@@ -30,6 +30,19 @@ pub enum ProcessorStatusFlag {
     Negative,
 }
 
+#[repr(u8)]
+#[derive(Debug)]
+pub enum Button {
+    Right = 0x01,
+    Left = 0x02,
+    Down = 0x04,
+    Up = 0x08,
+    Start = 0x10,
+    Select = 0x20,
+    B = 0x40,
+    A = 0x80,
+}
+
 impl Cpu {
     /// Initializes the SELF registers (currently placeholder values)
     pub fn new() -> Self {
@@ -716,13 +729,6 @@ impl Cpu {
                 4
             }
 
-            0xAD => {
-                let data = get_word(&rom, &mut self.pc);
-                let opop = abs(data);
-                lda(self, &ram, opop);
-                4
-            }
-
             0xAE => {
                 let data = get_word(&rom, &mut self.pc);
                 let opop = abs(data);
@@ -1062,10 +1068,18 @@ impl Cpu {
             // Shouldn't ever happen. If it does... well, yuh dun fuck'd son
             // NOTE: can use unreachable!() to tell the compiler this ^
             otherwise => {
-                //unreachable!();
                 panic!("Opcode 0x{:X} has not yet been implemented", otherwise);
-                255
             }
+        }
+    }
+
+    pub fn set_button(&mut self, ram: &mut Ram, button: Button, player_2: bool, state: bool) {
+        let addr = 0x4016 + (player_2 as usize);
+        let button_val = button as u8;
+        if state {
+            ram.data[addr] |= button_val;
+        } else {
+            ram.data[addr] &= !button_val;
         }
     }
 }

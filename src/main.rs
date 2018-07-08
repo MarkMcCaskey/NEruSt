@@ -10,9 +10,7 @@ pub mod memory;
 pub mod cartridge;
 
 use args::Settings;
-use cpu::addressing_modes::*;
 use cpu::cpu::*;
-use cpu::opcode_logic::*;
 use ram::ram::*;
 use rom::rom::*;
 

@@ -21,11 +21,9 @@ pub struct INESHeader {
 
 impl INESHeader {
     pub fn from(data: [u8; 16]) -> Self {
-        Self {
-            data
-        }
+        Self { data }
     }
-    
+
     pub fn get_prg_rom_size(&self) -> usize {
         self.data[4] as usize * 16384
     }

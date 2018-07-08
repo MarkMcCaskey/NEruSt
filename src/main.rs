@@ -5,9 +5,9 @@ pub mod cpu;
 pub mod ram;
 pub mod rom;
 
+pub mod cartridge;
 pub mod header;
 pub mod memory;
-pub mod cartridge;
 
 pub mod mappers;
 

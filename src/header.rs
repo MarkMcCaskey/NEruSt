@@ -1,8 +1,8 @@
 /* The iNES header is formatted like so:
 NOTE: These fields will be filled as the header type is implemented
     bytes 0-3: constant representing 'nes' + EOF byte
-    byte 4: size of PRG rom in 16384 byte units
-    byte 5: size of CHR rom in 8192 byte units
+    byte 4: size of PRG rom in 16384 ($4000) byte units
+    byte 5: size of CHR rom in 8192 ($2000) byte units
     byte 6: -----t--
         t: contains trainer
     byte 7:

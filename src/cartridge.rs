@@ -6,9 +6,9 @@ use header::*;
 use memory::*;
 
 pub struct Cartridge {
-	header: INESHeader,
-	prg_rom: Memory,
-	chr_rom: Memory,
+	pub header: INESHeader,
+	pub prg_rom: Memory,
+	pub chr_rom: Memory,
 }
 
 impl Cartridge {

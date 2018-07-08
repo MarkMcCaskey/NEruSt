@@ -9,6 +9,8 @@ pub mod header;
 pub mod memory;
 pub mod cartridge;
 
+pub mod mappers;
+
 use args::Settings;
 use cpu::cpu::*;
 use ram::ram::*;

@@ -26,7 +26,7 @@ impl Mapper for Mapper000 {
         }
     }
 
-    fn set(index: u16, data: u8, cart: &mut Cartridge) {
+    fn set(_index: u16, _data: u8, _cart: &mut Cartridge) {
         // I don't think this will ever be called
         unreachable!();
     }

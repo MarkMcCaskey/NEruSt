@@ -4,8 +4,10 @@ use std::io::BufReader;
 
 use header::*;
 use memory::*;
+use mappers::*;
 
 pub struct Cartridge {
+    pub mapper: Box<Mapper>,
     pub header: INESHeader,
     pub prg_rom: Memory,
     pub chr_rom: Memory,
@@ -22,6 +24,12 @@ impl Cartridge {
 
         // create header
         let header = INESHeader::from(header_bytes);
+
+        // load the mapper
+        let mapper = match header.get_mapper_id() {
+            0x00 => Box::new(Mapper000::new()),
+            _ => panic!("Mapper for this cart has not been implemented!"),
+        };
 
         // extract trainer if it exists (Do nothing with it for now)
         if header.contains_trainer() {
@@ -44,6 +52,7 @@ impl Cartridge {
 
         // create the cart
         Self {
+            mapper,
             header,
             prg_rom,
             chr_rom,

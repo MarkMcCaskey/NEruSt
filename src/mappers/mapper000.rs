@@ -1,10 +1,17 @@
 use cartridge::*;
 use mappers::mapper::*;
 
-struct Mapper000 {}
+pub struct Mapper000 {}
+
+impl Mapper000 {
+    pub fn new() -> Self {
+        Self { 
+        }
+    }
+}
 
 impl Mapper for Mapper000 {
-    fn get(index: u16, cart: &Cartridge) -> u8 {
+    fn get(&self, index: u16, cart: &Cartridge) -> u8 {
         // offset the cpu address
         let local_index = index - 0x8000;
 
@@ -26,7 +33,7 @@ impl Mapper for Mapper000 {
         }
     }
 
-    fn set(_index: u16, _data: u8, _cart: &mut Cartridge) {
+    fn set(&mut self, _index: u16, _data: u8, _cart: &mut Cartridge) {
         // I don't think this will ever be called
         unreachable!();
     }

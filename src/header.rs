@@ -40,4 +40,10 @@ impl INESHeader {
         // if the trainer bit isn't 0
         (self.data[6] & 0b0000_0100) != 0
     }
+
+    pub fn get_mapper_id(&self) -> u8 {
+        // the mapper is retrieved by combining the first 4 bits of
+        // flag 7 with the first 4 bits of flag 6.
+        (self.data[7] % 0b1111_0000) + (self.data[6] >> 4)
+    }
 }

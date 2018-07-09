@@ -11,6 +11,8 @@ pub mod memory;
 
 pub mod mappers;
 
+pub mod nes;
+
 use args::Settings;
 use cpu::cpu::*;
 use ram::ram::*;

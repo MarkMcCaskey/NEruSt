@@ -1,9 +1,11 @@
 extern crate clap;
+extern crate sdl2;
 
 pub mod args;
 pub mod cpu;
 pub mod ram;
 pub mod rom;
+pub mod window;
 
 pub mod cartridge;
 pub mod header;

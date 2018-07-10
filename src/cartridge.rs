@@ -1,61 +1,30 @@
+pub trait Cartridge {
+    fn get(&self, u16) -> u8;
+    fn set(&mut self, u16, u8);
+}
+
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 
 use header::*;
-use memory::*;
-use mappers::*;
+use mapper000board::*;
 
-pub struct Cartridge {
-    pub mapper: Box<Mapper>,
-    pub header: INESHeader,
-    pub prg_rom: Memory,
-    pub chr_rom: Memory,
-}
+fn load_cartridge(rom_name: String) -> Box<Cartridge> {
+    let file = File::open(rom_name).unwrap();
+    let mut buf_reader = BufReader::new(file);
 
-impl Cartridge {
-    pub fn load_from_file(rom_name: String) -> Self {
-        let file = File::open(rom_name).unwrap();
-        let mut buf_reader = BufReader::new(file);
+    // extract the header
+    let mut header_bytes = [0u8; 16];
+    buf_reader.read(&mut header_bytes).unwrap();
+    let header = INESHeader::from(header_bytes);
 
-        // read the first 16 bytes
-        let mut header_bytes = [0u8; 16];
-        buf_reader.read(&mut header_bytes).unwrap();
+    // create the board
+    let mapper_board = match header.get_mapper_id() {
+        0 => Mapper000Board::new(header, buf_reader),
+        _ => panic!("This rom is not supported!"),
+    };
 
-        // create header
-        let header = INESHeader::from(header_bytes);
-
-        // load the mapper
-        let mapper = match header.get_mapper_id() {
-            0x00 => Box::new(Mapper000::new()),
-            _ => panic!("Mapper for this cart has not been implemented!"),
-        };
-
-        // extract trainer if it exists (Do nothing with it for now)
-        if header.contains_trainer() {
-            // the hell even is a trainer??
-            let mut trainer_bytes = [0u8; 512];
-            buf_reader.read(&mut trainer_bytes).unwrap();
-        }
-
-        // extract PRG rom
-        let mut prg_rom_bytes = vec![0u8; header.get_prg_rom_size()].into_boxed_slice();
-        buf_reader.read(&mut prg_rom_bytes).unwrap();
-        let prg_rom = Memory::from_boxed_slice(prg_rom_bytes);
-
-        // extract chr rom
-        let mut chr_rom_bytes = vec![0u8; header.get_chr_rom_size()].into_boxed_slice();
-        buf_reader.read(&mut chr_rom_bytes).unwrap();
-        let chr_rom = Memory::from_boxed_slice(chr_rom_bytes);
-
-        // some other shit later
-
-        // create the cart
-        Self {
-            mapper,
-            header,
-            prg_rom,
-            chr_rom,
-        }
-    }
+    // return the cart
+    Box::new(mapper_board)
 }

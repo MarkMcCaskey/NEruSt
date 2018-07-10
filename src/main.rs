@@ -8,10 +8,9 @@ pub mod rom;
 pub mod cartridge;
 pub mod header;
 pub mod memory;
-
-pub mod mappers;
-
 pub mod nes;
+
+pub mod mapper000board;
 
 use args::Settings;
 use cpu::cpu::*;

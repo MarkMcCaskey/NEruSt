@@ -1,4 +1,4 @@
-use ram::ram::Ram;
+use getset::GetSet;
 
 pub enum OpcodeOperand {
     Implied,
@@ -18,29 +18,30 @@ pub fn imm(val: u8) -> OpcodeOperand {
 
 #[inline(always)]
 pub fn zp(adr: u8) -> OpcodeOperand {
-    OpcodeOperand::Address(adr as u16)
+    OpcodeOperand::Address(adr.into())
 }
 
 pub fn zpx(adr: u8, x: u8) -> OpcodeOperand {
     let indexed_adr: u8 = adr.wrapping_add(x);
-    OpcodeOperand::Address(indexed_adr as u16)
+    OpcodeOperand::Address(indexed_adr.into())
 }
 
 pub fn zpy(adr: u8, y: u8) -> OpcodeOperand {
     let indexed_adr: u8 = adr.wrapping_add(y);
-    OpcodeOperand::Address(indexed_adr as u16)
+    OpcodeOperand::Address(indexed_adr.into())
 }
 
-pub fn izx(ram: &Ram, adr: u8, x: u8) -> OpcodeOperand {
+pub fn izx(cpu_map: &GetSet, adr: u8, x: u8) -> OpcodeOperand {
     let indexed_adr: u8 = adr.wrapping_add(x);
-    let derefed_indexed_adr: u16 = (ram.data[indexed_adr as usize] as u16) << 8
-        | ram.data[indexed_adr.wrapping_add(1) as usize] as u16;
-    OpcodeOperand::Address(derefed_indexed_adr as u16)
+    let derefed_indexed_adr: u16 = (cpu_map.get(indexed_adr.into()) as u16) << 8
+
+        | cpu_map.get(indexed_adr.wrapping_add(1).into()) as u16;
+    OpcodeOperand::Address(derefed_indexed_adr)
 }
 
-pub fn izy(ram: &Ram, adr: u8, y: u8) -> (OpcodeOperand, bool) {
+pub fn izy(cpu_map: &GetSet, adr: u8, y: u8) -> (OpcodeOperand, bool) {
     let derefed_adr: u16 =
-        (ram.data[adr as usize] as u16) << 8 | ram.data[adr.wrapping_add(1) as usize] as u16;
+        (cpu_map.get(adr.into()) as u16) << 8 | cpu_map.get(adr.wrapping_add(1).into()) as u16;
     let indexed_derefed_adr: u16 = derefed_adr + y as u16;
     (
         OpcodeOperand::Address(indexed_derefed_adr),
@@ -68,8 +69,8 @@ pub fn aby(adr: u16, y: u8) -> (OpcodeOperand, bool) {
     )
 }
 
-pub fn ind(ram: &Ram, adr: u16) -> OpcodeOperand {
+pub fn ind(cpu_map: &GetSet, adr: u16) -> OpcodeOperand {
     let derefed_adr: u16 =
-        (ram.data[adr as usize] as u16) << 8 | ram.data[adr.wrapping_add(1) as usize] as u16;
+        (cpu_map.get(adr) as u16) << 8 | cpu_map.get(adr.wrapping_add(1)) as u16;
     OpcodeOperand::Address(derefed_adr)
 }

@@ -1,4 +1,4 @@
-use nes::{Button, Nes};
+//use nes::{Button, Nes};
 use sdl2::{self, event::Event, keyboard::Keycode, render::Canvas, video::Window, Sdl};
 
 pub struct EmuWindow {
@@ -33,7 +33,7 @@ impl EmuWindow {
         self.canvas.present();
     }
 
-    pub fn handle_events(&mut self, nes: &mut Nes) {
+    /*pub fn handle_events(&mut self, nes: &mut Nes) {
         for event in self.sdl_context.event_pump().unwrap().poll_iter() {
             match event {
                 Event::Quit { .. } => ::std::process::exit(0),
@@ -70,5 +70,5 @@ impl EmuWindow {
                 _ => (),
             }
         }
-    }
+    }*/
 }

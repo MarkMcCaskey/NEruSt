@@ -1,35 +1,46 @@
 extern crate clap;
-extern crate sdl2;
+//extern crate sdl2;
 
-pub mod args;
-pub mod cpu;
-pub mod ram;
-pub mod rom;
-pub mod window;
+mod args;
+//mod cpu;
+//mod window;
 
-pub mod cartridge;
-pub mod header;
-pub mod memory;
+mod cartridge;
+mod header;
+mod memory;
+mod cpu_map;
+mod cpu;
+mod getset;
 
-pub mod mappers;
-
-pub mod nes;
+//mod nes;
 
 use args::Settings;
-use cpu::cpu::*;
-use ram::ram::*;
-use rom::rom::*;
+use memory::Memory;
+use cpu_map::CpuMap;
+use cartridge::Cartridge;
+use cpu::cpu::Cpu;
 
 fn main() {
     let settings = Settings::new();
 
-    let mut cpu = Cpu::new();
-    let mut ram = Ram {
-        data: vec![0u8; 0x10000],
-    };
+    // The fakest blocks of memory
+    let mut ram = Memory::new(0x2000);
+    let mut ppu = Memory::new(0x0001); // this will be a PPU eventually
+    let mut io = Memory::new(0x0001); // this will be... something... someday
+    let mut cart = Cartridge::load_from_file(&settings.rom_file);
 
-    let rom = Rom::from_file(settings.rom_file).expect("Could not read ROM from file");
-    while !cpu.halt {
-        cpu.run_instruction(&mut ram, &rom);
+    // cpu
+    let mut cpu = Cpu::new();
+
+    // run 10 instructions
+    let mut cpu_map = CpuMap {
+        ram: &mut ram,
+        ppu: &mut ppu,
+        io: &mut io,
+        cart: &mut cart,
+    };
+    for _ in 0..10 {
+    	// run an instruction
+    	cpu.run_instruction(&mut cpu_map);
     }
 }

@@ -1,20 +1,24 @@
+/*
+    THIS CARTRIDGE ONLY WORK FOR SMB
+*/
+
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
+use std::path::Path;
+use getset::GetSet;
 
 use header::*;
 use memory::*;
-use mappers::*;
 
 pub struct Cartridge {
-    pub mapper: Box<Mapper>,
     pub header: INESHeader,
     pub prg_rom: Memory,
     pub chr_rom: Memory,
 }
 
 impl Cartridge {
-    pub fn load_from_file(rom_name: String) -> Self {
+    pub fn load_from_file(rom_name: &Path) -> Self {
         let file = File::open(rom_name).unwrap();
         let mut buf_reader = BufReader::new(file);
 
@@ -27,7 +31,7 @@ impl Cartridge {
 
         // load the mapper
         let mapper = match header.get_mapper_id() {
-            0x00 => Box::new(Mapper000::new()),
+            0x00 => { },
             _ => panic!("Mapper for this cart has not been implemented!"),
         };
 
@@ -52,10 +56,28 @@ impl Cartridge {
 
         // create the cart
         Self {
-            mapper,
             header,
             prg_rom,
             chr_rom,
         }
+    }
+}
+
+impl GetSet for Cartridge {
+    fn get(&self, addr: u16) -> u8 {
+        let wrap = match self.header.get_chr_rom_size() {
+            0x4000 => 0x3FFF,
+            0x8000 => 0x7FFF,
+            e => panic!("Invalid header rom for this mapper: {:x}", e), // probably
+        };
+        match addr {
+            0x4020 ..= 0x5FFF => unreachable!(), //probably
+            0x6000 ..= 0x7FFF => unreachable!(), // probably
+            0x8000 ..= 0xFFFF => self.prg_rom.get((addr - 0x8000) | wrap),
+            e => panic!("Invalid address lookup in Cartridge: {:x}", e), // probably
+        }     
+    }
+
+    fn set(&mut self, addr: u16, val: u8) {
     }
 }

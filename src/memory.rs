@@ -1,5 +1,4 @@
-use std::ops::Index;
-use std::ops::IndexMut;
+use getset::GetSet;
 
 pub struct Memory {
     memory: Box<[u8]>,
@@ -17,20 +16,12 @@ impl Memory {
     }
 }
 
-impl Index<usize> for Memory {
-    type Output = u8;
-
-    fn index(&self, index: usize) -> &u8 {
-        &self.memory[index]
+impl GetSet for Memory {
+    fn get(&self, addr: u16) -> u8 {
+        self.memory[addr as usize]
     }
-}
 
-impl IndexMut<usize> for Memory {
-    fn index_mut(&mut self, index: usize) -> &mut u8 {
-        &mut self.memory[index]
+    fn set(&mut self, addr: u16, val: u8) {
+        self.memory[addr as usize] = val;
     }
-}
-
-pub fn combine_bytes(high: u8, low: u8) -> u16 {
-    (high as u16) << 8 + low
 }

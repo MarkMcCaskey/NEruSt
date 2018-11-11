@@ -1,25 +1,57 @@
 extern crate clap;
+extern crate ezgl;
+extern crate gl;
 //extern crate sdl2;
 
 mod args;
 //mod cpu;
 //mod window;
 
+mod canvas;
 mod cartridge;
+mod cpu;
+mod cpu_map;
+mod emscripten;
+mod getset;
 mod header;
 mod memory;
-mod cpu_map;
-mod cpu;
-mod getset;
+mod system;
 
 //mod nes;
 
 use args::Settings;
-use memory::Memory;
-use cpu_map::CpuMap;
 use cartridge::Cartridge;
 use cpu::cpu::Cpu;
+use cpu_map::CpuMap;
+use memory::Memory;
+use system::System;
 
+extern "C" fn main_loop(sys: *mut std::os::raw::c_void) {
+    unsafe {
+        let mut sys = &mut *(sys as *mut System);
+        //step(&mut sys);
+    }
+}
+
+fn main() {
+    unsafe {
+        let mut attributes: emscripten::EmscriptenWebGLContextAttributes =
+            std::mem::uninitialized();
+        emscripten::emscripten_webgl_init_context_attributes(&mut attributes);
+        attributes.majorVersion = 2;
+        let handle = emscripten::emscripten_webgl_create_context(std::ptr::null(), &attributes);
+        emscripten::emscripten_webgl_make_context_current(handle);
+        /*let gl = gl::GlesFns::load_with(|addr| {
+            let addr = std::ffi::CString::new(addr).unwrap();
+            emscripten_GetProcAddress(addr.into_raw() as *const _) as *const _
+        });
+        let mut ctx = System::new(gl);
+        let ptr = &mut ctx as *mut _ as *mut std::os::raw::c_void;
+        emscripten_set_main_loop_arg(Some(main_loop), ptr, 0, 1);*/
+    }
+}
+
+#[cfg(feature = "native")]
 fn main() {
     let settings = Settings::new();
 
@@ -40,7 +72,7 @@ fn main() {
         cart: &mut cart,
     };
     for _ in 0..10 {
-    	// run an instruction
-    	cpu.run_instruction(&mut cpu_map);
+        // run an instruction
+        cpu.run_instruction(&mut cpu_map);
     }
 }

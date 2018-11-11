@@ -1,9 +1,9 @@
 # NEruSt
 [![Build Status](https://travis-ci.org/MarkMcCaskey/NEruSt.svg?branch=master)](https://travis-ci.org/MarkMcCaskey/NEruSt)
 
-NES emulator.  Back from the dead!
+NES emulator.
 
-Fun things coming.
+Web assembly and WebGL done with help from https://github.com/likr/rust-webgl2-example -- thanks!
 
 High level TODO list:
 - [ ] CPU emulation

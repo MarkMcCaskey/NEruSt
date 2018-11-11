@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>NES emulator</title>
+  </head>
+  <body>
+    <canvas width="500" height="500"/>
+    <script>
+      var Module = {
+      canvas: document.querySelector('canvas')
+      }
+    </script>
+    <script src="target/wasm32-unknown-emscripten/debug/NEruSt.js"></script>
+  </body>
+</html>

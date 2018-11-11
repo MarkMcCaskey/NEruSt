@@ -1,7 +1,8 @@
 extern crate clap;
 extern crate ezgl;
-extern crate gl;
-//extern crate sdl2;
+//#[macro_use]
+//extern crate stdweb;
+extern crate gleam;
 
 mod args;
 //mod cpu;
@@ -23,6 +24,7 @@ use args::Settings;
 use cartridge::Cartridge;
 use cpu::cpu::Cpu;
 use cpu_map::CpuMap;
+use gleam::gl;
 use memory::Memory;
 use system::System;
 
@@ -41,11 +43,11 @@ fn main() {
         attributes.majorVersion = 2;
         let handle = emscripten::emscripten_webgl_create_context(std::ptr::null(), &attributes);
         emscripten::emscripten_webgl_make_context_current(handle);
-        gl::load_with(|name| {
-            let name_ffi = std::ffi::CString::new(name).unwrap();
-            emscripten::emscripten_GetProcAddress(name.as_ptr() as *const _) as *const _
+        let gl = gl::GlesFns::load_with(|addr| {
+            let addr = std::ffi::CString::new(addr).unwrap();
+            emscripten::emscripten_GetProcAddress(addr.into_raw() as *const _) as *const _
         });
-        let mut ctx = System::new();
+        let mut ctx = System::new(gl);
         let ptr = &mut ctx as *mut _ as *mut std::os::raw::c_void;
         emscripten::emscripten_set_main_loop_arg(Some(main_loop), ptr, 0, 1);
     }

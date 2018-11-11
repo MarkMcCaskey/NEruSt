@@ -9,6 +9,7 @@ native = []
 
 [dependencies]
 #sdl2 = {version = "0.31", features = ["bundled"]}
-clap = "^2.31"
-gl = "^0.10.0"
+clap = "*"
 ezgl = { git = "https://github.com/Crocodoctogonopus/Ezgl" }
+#stdweb = "*"
+gleam = "*"

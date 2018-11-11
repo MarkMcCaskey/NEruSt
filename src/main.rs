@@ -29,7 +29,7 @@ use system::System;
 extern "C" fn main_loop(sys: *mut std::os::raw::c_void) {
     unsafe {
         let mut sys = &mut *(sys as *mut System);
-        //step(&mut sys);
+        sys.step();
     }
 }
 
@@ -41,13 +41,9 @@ fn main() {
         attributes.majorVersion = 2;
         let handle = emscripten::emscripten_webgl_create_context(std::ptr::null(), &attributes);
         emscripten::emscripten_webgl_make_context_current(handle);
-        /*let gl = gl::GlesFns::load_with(|addr| {
-            let addr = std::ffi::CString::new(addr).unwrap();
-            emscripten_GetProcAddress(addr.into_raw() as *const _) as *const _
-        });
-        let mut ctx = System::new(gl);
+        let mut ctx = System::new();
         let ptr = &mut ctx as *mut _ as *mut std::os::raw::c_void;
-        emscripten_set_main_loop_arg(Some(main_loop), ptr, 0, 1);*/
+        emscripten::emscripten_set_main_loop_arg(Some(main_loop), ptr, 0, 1);
     }
 }
 

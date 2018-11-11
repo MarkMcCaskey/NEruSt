@@ -65,7 +65,7 @@ impl Cartridge {
 
 impl GetSet for Cartridge {
     fn get(&self, addr: u16) -> u8 {
-        let wrap = match self.header.get_chr_rom_size() {
+        let wrap = match self.header.get_prg_rom_size() {
             0x4000 => 0x3FFF,
             0x8000 => 0x7FFF,
             e => panic!("Invalid header rom for this mapper: {:x}", e), // probably
@@ -73,7 +73,7 @@ impl GetSet for Cartridge {
         match addr {
             0x4020 ..= 0x5FFF => unreachable!(), //probably
             0x6000 ..= 0x7FFF => unreachable!(), // probably
-            0x8000 ..= 0xFFFF => self.prg_rom.get((addr - 0x8000) | wrap),
+            0x8000 ..= 0xFFFF => self.prg_rom.get((addr - 0x8000) & wrap),
             e => panic!("Invalid address lookup in Cartridge: {:x}", e), // probably
         }     
     }

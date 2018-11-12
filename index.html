@@ -5,12 +5,67 @@
     <title>NES emulator</title>
   </head>
   <body>
-    <canvas width="500" height="500"/>
-    <script>
-      var Module = {
-      canvas: document.querySelector('canvas')
-      }
-    </script>
-    <script src="target/wasm32-unknown-emscripten/debug/NEruSt.js"></script>
+    <div>
+      <canvas width="500" height="500"/>
+      <script>
+        var Module = {
+        canvas: document.querySelector('canvas')
+        }
+      </script>
+      <script src="target/wasm32-unknown-emscripten/debug/NEruSt.js"></script>
+    </div>
+    <div>
+      <div>
+        <button type="button">Reset</button>
+      </div>
+      <div>
+        <label for="rom">Select a ROM to load</label>
+        <input type="file" id="rom" name="rom">
+      </div>
+      <fieldset controls style="width: 50px">
+        <legend>controls</legend>
+        <div>
+          <div>
+            <label for="left">left: </label>
+            <input type="left" maxlength="1" id="text" value="a">
+          </div>
+
+          <div>
+            <label for="right">right: </label>
+            <input type="right" maxlength="1" id="text" value="d">
+          </div>
+
+          <div>
+            <label for="down">down: </label>
+            <input type="down" maxlength="1" id="text" value="s">
+          </div>
+
+          <div>
+            <label for="up">up: </label>
+            <input type="up" maxlength="1" id="text" value="w">
+          </div>
+
+          <div>
+            <label for="a">a: </label>
+            <input type="a" maxlength="1" id="text" value="j">
+          </div>
+
+          <div>
+            <label for="b">b: </label>
+            <input type="b" maxlength="1" id="text" value="k">
+          </div>
+
+          <div>
+            <label for="start">start: </label>
+            <input type="start" maxlength="1" id="text" value="1">
+          </div>
+
+          <div>
+            <label for="select">select: </label>
+            <input type="select" maxlength="1" id="text" value="2">
+          </div>
+        </div>
+      </fieldset>
+    </div>
   </body>
 </html>

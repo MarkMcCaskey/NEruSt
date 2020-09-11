@@ -1,6 +1,6 @@
-use cpu::addressing_modes::*;
-use cpu::opcode_logic::*;
-use getset::GetSet;
+use crate::cpu::addressing_modes::*;
+use crate::cpu::opcode_logic::*;
+use crate::getset::GetSet;
 
 pub struct Cpu {
     pub acc: u8,
@@ -54,7 +54,7 @@ impl Cpu {
         (self.p & flag_bit) == flag_bit
     }
 
-    pub fn run_instruction(&mut self, cpu_map: &mut GetSet) -> u8 {
+    pub fn run_instruction(&mut self, cpu_map: &mut dyn GetSet) -> u8 {
         let op = cpu_map.get(self.pc);
         match op {
             0x00 => {

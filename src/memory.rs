@@ -1,4 +1,4 @@
-use getset::GetSet;
+use crate::getset::GetSet;
 
 pub struct Memory {
     memory: Box<[u8]>,

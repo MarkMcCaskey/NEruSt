@@ -1,11 +1,11 @@
-use cpu::addressing_modes::OpcodeOperand;
-use cpu::cpu::{Cpu, ProcessorStatusFlag};
-use getset::GetSet;
+use crate::cpu::addressing_modes::OpcodeOperand;
+use crate::cpu::cpu::{Cpu, ProcessorStatusFlag};
+use crate::getset::GetSet;
 
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Load register opcodes
-pub fn lda(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
+pub fn lda(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     match opop {
         OpcodeOperand::Implied => unreachable!(),
         OpcodeOperand::Immediate(val) => cpu.acc = val,
@@ -18,7 +18,7 @@ pub fn lda(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
 }
 
-pub fn ldx(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
+pub fn ldx(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     match opop {
         OpcodeOperand::Implied => unreachable!(),
         OpcodeOperand::Immediate(val) => cpu.x = val,
@@ -31,7 +31,7 @@ pub fn ldx(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
 }
 
-pub fn ldy(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
+pub fn ldy(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     match opop {
         OpcodeOperand::Implied => unreachable!(),
         OpcodeOperand::Immediate(val) => cpu.y = val,
@@ -47,7 +47,7 @@ pub fn ldy(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Set cpu_mapdes
-pub fn sta(cpu: &Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
+pub fn sta(cpu: &Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     match opop {
         OpcodeOperand::Implied => unreachable!(),
         OpcodeOperand::Immediate(_) => unreachable!(),
@@ -57,7 +57,7 @@ pub fn sta(cpu: &Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
     // no flags to be set
 }
 
-pub fn stx(cpu: &Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
+pub fn stx(cpu: &Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     match opop {
         OpcodeOperand::Implied => unreachable!(),
         OpcodeOperand::Immediate(_) => unreachable!(),
@@ -67,7 +67,7 @@ pub fn stx(cpu: &Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
     // no flags to be set
 }
 
-pub fn sty(cpu: &Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
+pub fn sty(cpu: &Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     match opop {
         OpcodeOperand::Implied => unreachable!(),
         OpcodeOperand::Immediate(_) => unreachable!(),
@@ -80,7 +80,7 @@ pub fn sty(cpu: &Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Bitwise opcodes
-pub fn eor(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
+pub fn eor(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     match opop {
         OpcodeOperand::Implied => unreachable!(),
         OpcodeOperand::Immediate(val) => cpu.acc ^= val,
@@ -91,7 +91,7 @@ pub fn eor(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
 }
 
-pub fn and(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
+pub fn and(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     match opop {
         OpcodeOperand::Implied => unreachable!(),
         OpcodeOperand::Immediate(val) => cpu.acc &= val,
@@ -102,7 +102,7 @@ pub fn and(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
 }
 
-pub fn ora(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
+pub fn ora(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     match opop {
         OpcodeOperand::Implied => unreachable!(),
         OpcodeOperand::Immediate(val) => cpu.acc |= val,
@@ -191,7 +191,7 @@ pub fn txs(cpu: &mut Cpu) {
     cpu.s = cpu.x;
 }
 
-pub fn pla(cpu: &mut Cpu, cpu_map: &mut GetSet) {
+pub fn pla(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
     cpu.s += 1;
     let idx = cpu.s;
     cpu.acc = cpu_map.get(idx as u16);
@@ -202,20 +202,20 @@ pub fn pla(cpu: &mut Cpu, cpu_map: &mut GetSet) {
     cpu.set_flag_value(ProcessorStatusFlag::Negative, is_neg);
 }
 
-pub fn pha(cpu: &mut Cpu, cpu_map: &mut GetSet) {
+pub fn pha(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
     let idx = cpu.s;
     cpu_map.set(idx as u16, cpu.acc);
     cpu.s -= 1;
 }
 
 // Note: inconsistent documentation.  Some say that B flag is not affected by this, others say it's the only way
-pub fn plp(cpu: &mut Cpu, cpu_map: &mut GetSet) {
+pub fn plp(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
     cpu.s += 1;
     let idx = cpu.s;
     cpu.p = cpu_map.get(idx as u16);
 }
 
-pub fn php(cpu: &mut Cpu, cpu_map: &mut GetSet) {
+pub fn php(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
     let idx = cpu.s;
     cpu_map.set(idx as u16, cpu.p);
     cpu.s -= 1;
@@ -255,7 +255,7 @@ pub fn iny(cpu: &mut Cpu) {
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Math opcodes
-pub fn adc(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
+pub fn adc(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     let old_acc: u8 = cpu.acc;
     let val: u8 = match opop {
         OpcodeOperand::Implied => unreachable!(),
@@ -280,7 +280,7 @@ pub fn adc(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
 }
 
-pub fn sbc(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
+pub fn sbc(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     let old_acc: u8 = cpu.acc;
     let val: u8 = match opop {
         OpcodeOperand::Implied => unreachable!(),
@@ -308,7 +308,7 @@ pub fn sbc(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Shift opcodes
-pub fn rol(cpu: &mut Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
+pub fn rol(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
         OpcodeOperand::Implied => {
             let old_val = cpu.acc;
@@ -335,7 +335,7 @@ pub fn rol(cpu: &mut Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-pub fn ror(cpu: &mut Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
+pub fn ror(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
         OpcodeOperand::Implied => {
             let old_val = cpu.acc;
@@ -362,7 +362,7 @@ pub fn ror(cpu: &mut Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-pub fn lsr(cpu: &mut Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
+pub fn lsr(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
         OpcodeOperand::Implied => {
             let old_val = cpu.acc;
@@ -387,7 +387,7 @@ pub fn lsr(cpu: &mut Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-pub fn asl(cpu: &mut Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
+pub fn asl(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     let (old_val, new_val) = match opop {
         OpcodeOperand::Implied => {
             let old_val = cpu.acc;
@@ -436,7 +436,7 @@ fn common_cmp(cpu: &mut Cpu, first: u8, second: u8) {
     }
 }
 
-pub fn cmp(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
+pub fn cmp(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     let value = match opop {
         OpcodeOperand::Address(addr) => cpu_map.get(addr),
         OpcodeOperand::Immediate(imm) => imm,
@@ -446,7 +446,7 @@ pub fn cmp(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
     common_cmp(cpu, first_val, value)
 }
 
-pub fn cpx(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
+pub fn cpx(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     let value = match opop {
         OpcodeOperand::Address(addr) => cpu_map.get(addr),
         OpcodeOperand::Immediate(imm) => imm,
@@ -456,7 +456,7 @@ pub fn cpx(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
     common_cmp(cpu, first_val, value)
 }
 
-pub fn cpy(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
+pub fn cpy(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     let value = match opop {
         OpcodeOperand::Address(addr) => cpu_map.get(addr),
         OpcodeOperand::Immediate(imm) => imm,
@@ -466,7 +466,7 @@ pub fn cpy(cpu: &mut Cpu, cpu_map: &GetSet, opop: OpcodeOperand) {
     common_cmp(cpu, first_val, value)
 }
 
-pub fn dec(cpu: &mut Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
+pub fn dec(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     let new_value = match opop {
         OpcodeOperand::Address(addr) => {
             let val = cpu_map.get(addr).wrapping_sub(1);
@@ -481,7 +481,7 @@ pub fn dec(cpu: &mut Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Negative, new_value & 0x80 == 0x80);
 }
 
-pub fn inc(cpu: &mut Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
+pub fn inc(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     let new_value = match opop {
         OpcodeOperand::Address(addr) => {
             let val = cpu_map.get(addr).wrapping_add(1);
@@ -610,25 +610,25 @@ pub fn beq(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
 }
 
 // TODO: this function is probably wrong
-pub fn brk(cpu: &mut Cpu, cpu_map: &mut GetSet) {
+pub fn brk(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
     cpu.set_flag_value(ProcessorStatusFlag::Interrupt, true);
     cpu.set_flag_value(ProcessorStatusFlag::Break, true);
     let idx = cpu.s;
     cpu_map.set(idx as u16, cpu.pc as u8);
     cpu_map.set(idx.wrapping_sub(1) as u16, (cpu.pc >> 8) as u8);
-    cpu_map.set(idx.wrapping_sub(2) as u16, cpu.p); 
+    cpu_map.set(idx.wrapping_sub(2) as u16, cpu.p);
     cpu.s = cpu.s.wrapping_sub(3);
     cpu.pc = cpu_map.get(0xFFFE) as u16 | ((cpu_map.get(0xFFFF) as u16) << 8);
 }
 
-pub fn rti(cpu: &mut Cpu, cpu_map: &GetSet) {
+pub fn rti(cpu: &mut Cpu, cpu_map: &dyn GetSet) {
     let idx = cpu.s;
     cpu.p = cpu_map.get(idx as u16 + 1);
     cpu.pc = cpu_map.get(idx as u16 + 2) as u16 | ((cpu_map.get(idx as u16 + 3) as u16) << 8);
     cpu.s += 3;
 }
 
-pub fn jsr(cpu: &mut Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
+pub fn jsr(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     let idx = cpu.s;
     cpu_map.set(idx as u16, cpu.pc as u8);
     cpu_map.set(idx as u16 - 1, (cpu.pc >> 8) as u8);
@@ -641,7 +641,7 @@ pub fn jsr(cpu: &mut Cpu, cpu_map: &mut GetSet, opop: OpcodeOperand) {
     }
 }
 
-pub fn rts(cpu: &mut Cpu, cpu_map: &GetSet) {
+pub fn rts(cpu: &mut Cpu, cpu_map: &dyn GetSet) {
     let idx = cpu.s;
     cpu.pc = cpu_map.get(idx as u16 + 1) as u16 | ((cpu_map.get(idx as u16 + 2) as u16) << 8);
     cpu.s += 2;

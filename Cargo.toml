@@ -1,7 +1,8 @@
 [package]
 name = "NEruSt"
-version = "0.0.1"
+version = "0.0.0"
 authors = ["Akourne Burschtein", "Mark McCaskey"]
+edition = "2018"
 
 [dependencies]
 #sdl2 = {version = "0.31", features = ["bundled"]}

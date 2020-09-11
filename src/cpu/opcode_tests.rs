@@ -1,10 +1,10 @@
 #![cfg(test)]
 
-use cpu::cpu::Cpu;
+use crate::cpu::cpu::Cpu;
 
 #[test]
 fn test_ld() {
-    let mut cpu = Cpu::new();
+    let _cpu = Cpu::new();
 
     //cpu.run_instruction()
     assert!(true);

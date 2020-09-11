@@ -11,9 +11,9 @@ NOTE: These fields will be filled as the header type is implemented
     byte 10:
     byte 11:
     byte 12:
-    byte 13: 
+    byte 13:
     byte 14:
-    byte 15:    
+    byte 15:
 */
 pub struct INESHeader {
     data: [u8; 16],

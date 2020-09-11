@@ -1,24 +1,21 @@
-extern crate clap;
-//extern crate sdl2;
-
 mod args;
 //mod cpu;
 //mod window;
 
 mod cartridge;
+mod cpu;
+mod cpu_map;
+mod getset;
 mod header;
 mod memory;
-mod cpu_map;
-mod cpu;
-mod getset;
 
 //mod nes;
 
-use args::Settings;
-use memory::Memory;
-use cpu_map::CpuMap;
-use cartridge::Cartridge;
-use cpu::cpu::Cpu;
+use crate::args::Settings;
+use crate::cartridge::Cartridge;
+use crate::cpu::cpu::Cpu;
+use crate::cpu_map::CpuMap;
+use crate::memory::Memory;
 
 fn main() {
     let settings = Settings::new();
@@ -40,7 +37,7 @@ fn main() {
         cart: &mut cart,
     };
     for _ in 0..10 {
-    	// run an instruction
-    	cpu.run_instruction(&mut cpu_map);
+        // run an instruction
+        cpu.run_instruction(&mut cpu_map);
     }
 }

@@ -1221,7 +1221,9 @@ impl Cpu {
 
             // Shouldn't ever happen.
             // NOTE: can use unreachable!() to tell the compiler this ^
-
+            otherwise => {
+                panic!("Opcode 0x{:X} has not yet been implemented", otherwise);
+            }
         };
 
         self.pc += pc_inc_by;

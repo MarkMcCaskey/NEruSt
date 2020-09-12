@@ -104,14 +104,14 @@ impl Cpu {
             }
 
             0x0D => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 ora(self, cpu_map, opop);
                 4
             }
 
             0x0E => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 asl(self, cpu_map, opop);
                 4
@@ -151,28 +151,28 @@ impl Cpu {
             }
 
             0x19 => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = aby(data, self.y);
                 ora(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0x1D => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 ora(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0x1E => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 asl(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0x20 => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 jsr(self, cpu_map, opop);
                 6
@@ -225,20 +225,20 @@ impl Cpu {
             }
 
             0x2C => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 bit(self, opop);
                 4
             }
             0x2D => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 and(self, cpu_map, opop);
                 4
             }
 
             0x2E => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 rol(self, cpu_map, opop);
                 4
@@ -278,24 +278,29 @@ impl Cpu {
             }
 
             0x39 => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = aby(data, self.y);
                 and(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0x3D => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 and(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0x3E => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 rol(self, cpu_map, opop);
                 4 + add_cycle as u8
+            }
+
+            0x40 => {
+                rti(self, cpu_map);
+                6
             }
 
             0x41 => {
@@ -338,21 +343,21 @@ impl Cpu {
             }
 
             0x4C => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 jmp(self, opop);
                 3
             }
 
             0x4D => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 eor(self, cpu_map, opop);
                 4
             }
 
             0x4E => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 lsr(self, cpu_map, opop);
                 4
@@ -392,21 +397,21 @@ impl Cpu {
             }
 
             0x59 => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = aby(data, self.y);
                 eor(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0x5D => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 eor(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0x5E => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 lsr(self, cpu_map, opop);
                 4 + add_cycle as u8
@@ -457,21 +462,21 @@ impl Cpu {
             }
 
             0x6C => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = ind(cpu_map, data);
                 jmp(self, opop);
                 5
             }
 
             0x6D => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 adc(self, cpu_map, opop);
                 4
             }
 
             0x6E => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 ror(self, cpu_map, opop);
                 4
@@ -511,21 +516,21 @@ impl Cpu {
             }
 
             0x79 => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = aby(data, self.y);
                 adc(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0x7D => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 adc(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0x7E => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 ror(self, cpu_map, opop);
                 4 + add_cycle as u8
@@ -570,21 +575,21 @@ impl Cpu {
             }
 
             0x8C => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 sty(self, cpu_map, opop);
                 4
             }
 
             0x8D => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 sta(self, cpu_map, opop);
                 4
             }
 
             0x8E => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 stx(self, cpu_map, opop);
                 4
@@ -631,7 +636,7 @@ impl Cpu {
             }
 
             0x99 => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = aby(data, self.y);
                 sta(self, cpu_map, opop);
                 4 + add_cycle as u8
@@ -643,7 +648,7 @@ impl Cpu {
             }
 
             0x9D => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 sta(self, cpu_map, opop);
                 4 + add_cycle as u8
@@ -709,14 +714,14 @@ impl Cpu {
             }
 
             0xAD => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 ldy(self, cpu_map, opop);
                 4
             }
 
             0xAE => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 ldx(self, cpu_map, opop);
                 4
@@ -763,7 +768,7 @@ impl Cpu {
             }
 
             0xB9 => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = aby(data, self.y);
                 lda(self, cpu_map, opop);
                 4 + add_cycle as u8
@@ -775,21 +780,21 @@ impl Cpu {
             }
 
             0xBC => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 ldy(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0xBD => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 lda(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0xBE => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = aby(data, self.y);
                 ldx(self, cpu_map, opop);
                 4 + add_cycle as u8
@@ -848,21 +853,21 @@ impl Cpu {
             }
 
             0xCC => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 cpy(self, cpu_map, opop);
                 4
             }
 
             0xCD => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 cmp(self, cpu_map, opop);
                 4
             }
 
             0xCE => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 dec(self, cpu_map, opop);
                 4
@@ -902,21 +907,21 @@ impl Cpu {
             }
 
             0xD9 => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = aby(data, self.y);
                 cmp(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0xDD => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 cmp(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0xDE => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 dec(self, cpu_map, opop);
                 4 + add_cycle as u8
@@ -970,21 +975,21 @@ impl Cpu {
             }
 
             0xEC => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 cpx(self, cpu_map, opop);
                 4
             }
 
             0xED => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 sbc(self, cpu_map, opop);
                 4
             }
 
             0xEE => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 inc(self, cpu_map, opop);
                 4
@@ -1024,21 +1029,21 @@ impl Cpu {
             }
 
             0xF9 => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = aby(data, self.y);
                 sbc(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0xFD => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 sbc(self, cpu_map, opop);
                 4 + add_cycle as u8
             }
 
             0xFE => {
-                let data = (cpu_map.get(self.pc + 1) as u16) << 8 + cpu_map.get(self.pc + 2);
+                let data = cpu_map.get_16(self.pc + 1);
                 let (opop, add_cycle) = abx(data, self.x);
                 inc(self, cpu_map, opop);
                 4 + add_cycle as u8

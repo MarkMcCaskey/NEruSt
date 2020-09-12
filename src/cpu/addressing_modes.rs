@@ -1,5 +1,6 @@
 use crate::getset::GetSet;
 
+#[derive(Debug, Clone, Copy)]
 pub enum OpcodeOperand {
     Implied,
     Immediate(u8),

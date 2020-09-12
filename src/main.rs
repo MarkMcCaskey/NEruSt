@@ -36,8 +36,16 @@ fn main() {
         io: &mut io,
         cart: &mut cart,
     };
+    use crate::getset::GetSet;
+    cpu.pc = 0xC000;
+    let mut cyc = 0;
     for _ in 0..10 {
+        let inst = cpu_map.get(cpu.pc);
+        println!(
+            "{:04X} {:2X}    A:{:02X} X:{:02X} Y:{:02X} P:{:02X} SP:{:02X} PPU:{:3},{:3} CYC:{}",
+            cpu.pc, inst, cpu.acc, cpu.x, cpu.y, cpu.p, cpu.s, 0, 0, cyc,
+        );
         // run an instruction
-        cpu.run_instruction(&mut cpu_map);
+        cyc += cpu.run_instruction(&mut cpu_map) as usize;
     }
 }

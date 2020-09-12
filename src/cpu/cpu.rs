@@ -43,10 +43,22 @@ impl Cpu {
         }
     }
 
+    #[inline(always)]
+    pub fn clear_flag(&mut self, flag: ProcessorStatusFlag) {
+        self.p &= !(1 << flag as u8);
+    }
+
+    #[inline(always)]
+    pub fn set_flag(&mut self, flag: ProcessorStatusFlag) {
+        self.p |= 1 << flag as u8;
+    }
+
+    #[inline(always)]
     pub fn set_flag_value(&mut self, flag: ProcessorStatusFlag, val: bool) {
-        let bit = (val as u8) << (flag as u8);
-        self.p &= !bit;
-        self.p |= bit;
+        match val {
+            true => self.set_flag(flag),
+            false => self.clear_flag(flag),
+        }
     }
 
     pub fn get_processor_status_flag(&self, flag: ProcessorStatusFlag) -> bool {

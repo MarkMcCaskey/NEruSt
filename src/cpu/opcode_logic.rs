@@ -68,31 +68,31 @@ pub fn ora(val: u8, cpu: &mut Cpu) {
 //////////////////////////////////////////////////
 ///// Set/clear flag opcodes
 pub fn clc(cpu: &mut Cpu) {
-    cpu.set_flag_value(ProcessorStatusFlag::Carry, false);
+    cpu.clear_flag(ProcessorStatusFlag::Carry);
 }
 
 pub fn cld(cpu: &mut Cpu) {
-    cpu.set_flag_value(ProcessorStatusFlag::Decimal, false);
+    cpu.clear_flag(ProcessorStatusFlag::Decimal);
 }
 
 pub fn cli(cpu: &mut Cpu) {
-    cpu.set_flag_value(ProcessorStatusFlag::Interrupt, false);
+    cpu.clear_flag(ProcessorStatusFlag::Interrupt);
 }
 
 pub fn clv(cpu: &mut Cpu) {
-    cpu.set_flag_value(ProcessorStatusFlag::Overflow, false);
+    cpu.clear_flag(ProcessorStatusFlag::Overflow);
 }
 
 pub fn sec(cpu: &mut Cpu) {
-    cpu.set_flag_value(ProcessorStatusFlag::Carry, true);
+    cpu.set_flag(ProcessorStatusFlag::Carry);
 }
 
 pub fn sed(cpu: &mut Cpu) {
-    cpu.set_flag_value(ProcessorStatusFlag::Decimal, true);
+    cpu.set_flag(ProcessorStatusFlag::Decimal);
 }
 
 pub fn sei(cpu: &mut Cpu) {
-    cpu.set_flag_value(ProcessorStatusFlag::Interrupt, true);
+    cpu.set_flag(ProcessorStatusFlag::Interrupt);
 }
 
 //////////////////////////////////////////////////

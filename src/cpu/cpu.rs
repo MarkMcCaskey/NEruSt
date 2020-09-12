@@ -58,11 +58,12 @@ impl Cpu {
         let op = cpu_map.get(self.pc);
 
         let pc_inc_by;
-        let time_passed = match op {
+        let cyc_inc_by;
+        match op {
             0x00 => {
                 brk(self, cpu_map);
                 pc_inc_by = 1;
-                7
+                cyc_inc_by = 7;
             }
 
             0x01 => {
@@ -72,7 +73,7 @@ impl Cpu {
                 // unverified; same with other recently added opcodes to dispatch;
                 // TODO: use gitblame and update recently added time delays
                 pc_inc_by = 2;
-                6
+                cyc_inc_by = 6;
             }
 
             0x05 => {
@@ -80,7 +81,7 @@ impl Cpu {
                 let opop = zp(data);
                 ora(self, cpu_map, opop);
                 pc_inc_by = 2;
-                3
+                cyc_inc_by = 3;
             }
 
             0x06 => {
@@ -88,13 +89,13 @@ impl Cpu {
                 let opop = zp(data);
                 asl(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x08 => {
                 php(self, cpu_map);
                 pc_inc_by = 1;
-                3
+                cyc_inc_by = 3;
             }
 
             0x09 => {
@@ -102,14 +103,14 @@ impl Cpu {
                 let opop = imm(data);
                 ora(self, cpu_map, opop);
                 pc_inc_by = 2;
-                2
+                cyc_inc_by = 2;
             }
 
             0x0A => {
                 let opop = imp();
                 asl(self, cpu_map, opop);
                 pc_inc_by = 1;
-                4
+                cyc_inc_by = 4;
             }
 
             0x0D => {
@@ -117,7 +118,7 @@ impl Cpu {
                 let opop = abs(data);
                 ora(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0x0E => {
@@ -125,7 +126,7 @@ impl Cpu {
                 let opop = abs(data);
                 asl(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0x10 => {
@@ -133,7 +134,7 @@ impl Cpu {
                 let opop = imm(data);
                 let result = bpl(self, opop);
                 pc_inc_by = 2;
-                2 + result as u8 // + page boundary crossed
+                cyc_inc_by = 2 + result as u8 // + page boundary crossed;
             }
 
             0x11 => {
@@ -141,7 +142,7 @@ impl Cpu {
                 let (opop, add_cycle) = izy(cpu_map, data, self.y);
                 ora(self, cpu_map, opop);
                 pc_inc_by = 2;
-                5 + add_cycle as u8
+                cyc_inc_by = 5 + add_cycle as u8;
             }
 
             0x15 => {
@@ -149,7 +150,7 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 ora(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x16 => {
@@ -157,13 +158,13 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 asl(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x18 => {
                 clc(self);
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
 
             0x19 => {
@@ -171,7 +172,7 @@ impl Cpu {
                 let (opop, add_cycle) = aby(data, self.y);
                 ora(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x1D => {
@@ -179,7 +180,7 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 ora(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x1E => {
@@ -187,7 +188,7 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 asl(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x20 => {
@@ -196,7 +197,7 @@ impl Cpu {
                 jsr(self, cpu_map, opop);
 
                 pc_inc_by = 0;
-                6
+                cyc_inc_by = 6;
             }
 
             0x21 => {
@@ -204,7 +205,7 @@ impl Cpu {
                 let opop = izx(cpu_map, data, self.x);
                 and(self, cpu_map, opop);
                 pc_inc_by = 2;
-                6
+                cyc_inc_by = 6;
             }
 
             0x24 => {
@@ -212,7 +213,7 @@ impl Cpu {
                 let opop = zp(data);
                 bit(self, opop);
                 pc_inc_by = 2;
-                3
+                cyc_inc_by = 3;
             }
 
             0x25 => {
@@ -220,7 +221,7 @@ impl Cpu {
                 let opop = zp(data);
                 and(self, cpu_map, opop);
                 pc_inc_by = 2;
-                3
+                cyc_inc_by = 3;
             }
 
             0x26 => {
@@ -228,13 +229,13 @@ impl Cpu {
                 let opop = zp(data);
                 rol(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x28 => {
                 plp(self, cpu_map);
                 pc_inc_by = 1;
-                4
+                cyc_inc_by = 4;
             }
 
             0x29 => {
@@ -242,14 +243,14 @@ impl Cpu {
                 let opop = imm(data);
                 and(self, cpu_map, opop);
                 pc_inc_by = 2;
-                2
+                cyc_inc_by = 2;
             }
 
             0x2A => {
                 let opop = imp();
                 rol(self, cpu_map, opop);
                 pc_inc_by = 1;
-                4
+                cyc_inc_by = 4;
             }
 
             0x2C => {
@@ -257,14 +258,14 @@ impl Cpu {
                 let opop = abs(data);
                 bit(self, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
             0x2D => {
                 let data = cpu_map.get_16(self.pc + 1);
                 let opop = abs(data);
                 and(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0x2E => {
@@ -272,7 +273,7 @@ impl Cpu {
                 let opop = abs(data);
                 rol(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0x30 => {
@@ -280,7 +281,7 @@ impl Cpu {
                 let opop = imm(data);
                 let result = bmi(self, opop);
                 pc_inc_by = 2;
-                2 + result as u8 // + page boundary crossed
+                cyc_inc_by = 2 + result as u8 // + page boundary crossed;
             }
 
             0x31 => {
@@ -288,7 +289,7 @@ impl Cpu {
                 let (opop, add_cycle) = izy(cpu_map, data, self.y);
                 and(self, cpu_map, opop);
                 pc_inc_by = 2;
-                5 + add_cycle as u8
+                cyc_inc_by = 5 + add_cycle as u8;
             }
 
             0x35 => {
@@ -296,7 +297,7 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 and(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x36 => {
@@ -304,13 +305,13 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 rol(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x38 => {
                 sec(self);
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
 
             0x39 => {
@@ -318,7 +319,7 @@ impl Cpu {
                 let (opop, add_cycle) = aby(data, self.y);
                 and(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x3D => {
@@ -326,7 +327,7 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 and(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x3E => {
@@ -334,13 +335,13 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 rol(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x40 => {
                 rti(self, cpu_map);
                 pc_inc_by = 0;
-                6
+                cyc_inc_by = 6;
             }
 
             0x41 => {
@@ -348,7 +349,7 @@ impl Cpu {
                 let opop = izx(cpu_map, data, self.x);
                 eor(self, cpu_map, opop);
                 pc_inc_by = 2;
-                6
+                cyc_inc_by = 6;
             }
 
             0x45 => {
@@ -356,7 +357,7 @@ impl Cpu {
                 let opop = zp(data);
                 eor(self, cpu_map, opop);
                 pc_inc_by = 2;
-                3
+                cyc_inc_by = 3;
             }
 
             0x46 => {
@@ -364,13 +365,13 @@ impl Cpu {
                 let opop = zp(data);
                 lsr(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x48 => {
                 pha(self, cpu_map);
                 pc_inc_by = 1;
-                3
+                cyc_inc_by = 3;
             }
 
             0x49 => {
@@ -378,14 +379,14 @@ impl Cpu {
                 let opop = imm(data);
                 eor(self, cpu_map, opop);
                 pc_inc_by = 2;
-                2
+                cyc_inc_by = 2;
             }
 
             0x4A => {
                 let opop = imp();
                 lsr(self, cpu_map, opop);
                 pc_inc_by = 1;
-                4
+                cyc_inc_by = 4;
             }
 
             0x4C => {
@@ -393,7 +394,7 @@ impl Cpu {
                 let opop = abs(data);
                 jmp(self, opop);
                 pc_inc_by = 0;
-                3
+                cyc_inc_by = 3;
             }
 
             0x4D => {
@@ -401,7 +402,7 @@ impl Cpu {
                 let opop = abs(data);
                 eor(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0x4E => {
@@ -409,7 +410,7 @@ impl Cpu {
                 let opop = abs(data);
                 lsr(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0x50 => {
@@ -417,7 +418,7 @@ impl Cpu {
                 let opop = imm(data);
                 let result = bvc(self, opop);
                 pc_inc_by = 2;
-                2 + result as u8 // + page boundary crossed
+                cyc_inc_by = 2 + result as u8 // + page boundary crossed;
             }
 
             0x51 => {
@@ -425,7 +426,7 @@ impl Cpu {
                 let (opop, add_cycle) = izy(cpu_map, data, self.y);
                 eor(self, cpu_map, opop);
                 pc_inc_by = 2;
-                5 + add_cycle as u8
+                cyc_inc_by = 5 + add_cycle as u8;
             }
 
             0x55 => {
@@ -433,7 +434,7 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 eor(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x56 => {
@@ -441,13 +442,13 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 lsr(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x58 => {
                 cli(self);
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
 
             0x59 => {
@@ -455,7 +456,7 @@ impl Cpu {
                 let (opop, add_cycle) = aby(data, self.y);
                 eor(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x5D => {
@@ -463,7 +464,7 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 eor(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x5E => {
@@ -471,13 +472,13 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 lsr(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x60 => {
                 rts(self, cpu_map);
                 pc_inc_by = 0;
-                6
+                cyc_inc_by = 6;
             }
 
             0x61 => {
@@ -485,7 +486,7 @@ impl Cpu {
                 let opop = izx(cpu_map, data, self.x);
                 adc(self, cpu_map, opop);
                 pc_inc_by = 2;
-                6
+                cyc_inc_by = 6;
             }
 
             0x65 => {
@@ -493,7 +494,7 @@ impl Cpu {
                 let opop = zp(data);
                 adc(self, cpu_map, opop);
                 pc_inc_by = 2;
-                3
+                cyc_inc_by = 3;
             }
 
             0x66 => {
@@ -501,13 +502,13 @@ impl Cpu {
                 let opop = zp(data);
                 ror(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x68 => {
                 pla(self, cpu_map);
                 pc_inc_by = 1;
-                4
+                cyc_inc_by = 4;
             }
 
             0x69 => {
@@ -515,14 +516,14 @@ impl Cpu {
                 let opop = imm(data);
                 adc(self, cpu_map, opop);
                 pc_inc_by = 2;
-                2
+                cyc_inc_by = 2;
             }
 
             0x6A => {
                 let opop = imp();
                 ror(self, cpu_map, opop);
                 pc_inc_by = 1;
-                4
+                cyc_inc_by = 4;
             }
 
             0x6C => {
@@ -530,7 +531,7 @@ impl Cpu {
                 let opop = ind(cpu_map, data);
                 jmp(self, opop);
                 pc_inc_by = 0;
-                5
+                cyc_inc_by = 5;
             }
 
             0x6D => {
@@ -538,7 +539,7 @@ impl Cpu {
                 let opop = abs(data);
                 adc(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0x6E => {
@@ -546,7 +547,7 @@ impl Cpu {
                 let opop = abs(data);
                 ror(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0x70 => {
@@ -554,7 +555,7 @@ impl Cpu {
                 let opop = imm(data);
                 let result = bvs(self, opop);
                 pc_inc_by = 2;
-                2 + result as u8 // + page boundary crossed
+                cyc_inc_by = 2 + result as u8 // + page boundary crossed;
             }
 
             0x71 => {
@@ -562,7 +563,7 @@ impl Cpu {
                 let (opop, add_cycle) = izy(cpu_map, data, self.y);
                 adc(self, cpu_map, opop);
                 pc_inc_by = 2;
-                5 + add_cycle as u8
+                cyc_inc_by = 5 + add_cycle as u8;
             }
 
             0x75 => {
@@ -570,7 +571,7 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 adc(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x76 => {
@@ -578,13 +579,13 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 ror(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x78 => {
                 sei(self);
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
 
             0x79 => {
@@ -592,7 +593,7 @@ impl Cpu {
                 let (opop, add_cycle) = aby(data, self.y);
                 adc(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x7D => {
@@ -600,7 +601,7 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 adc(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x7E => {
@@ -608,7 +609,7 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 ror(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x81 => {
@@ -616,7 +617,7 @@ impl Cpu {
                 let opop = izx(cpu_map, data, self.x);
                 sta(&self, cpu_map, opop);
                 pc_inc_by = 2;
-                6
+                cyc_inc_by = 6;
             }
 
             0x84 => {
@@ -624,7 +625,7 @@ impl Cpu {
                 let opop = zp(data);
                 sty(self, cpu_map, opop);
                 pc_inc_by = 2;
-                3
+                cyc_inc_by = 3;
             }
 
             0x85 => {
@@ -632,7 +633,7 @@ impl Cpu {
                 let opop = zp(data);
                 sta(self, cpu_map, opop);
                 pc_inc_by = 2;
-                3
+                cyc_inc_by = 3;
             }
 
             0x86 => {
@@ -640,19 +641,19 @@ impl Cpu {
                 let opop = zp(data);
                 stx(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x88 => {
                 dey(self);
                 pc_inc_by = 1;
-                4
+                cyc_inc_by = 4;
             }
 
             0x8A => {
                 txa(self);
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
 
             0x8C => {
@@ -660,7 +661,7 @@ impl Cpu {
                 let opop = abs(data);
                 sty(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0x8D => {
@@ -668,7 +669,7 @@ impl Cpu {
                 let opop = abs(data);
                 sta(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0x8E => {
@@ -676,7 +677,7 @@ impl Cpu {
                 let opop = abs(data);
                 stx(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0x90 => {
@@ -684,7 +685,7 @@ impl Cpu {
                 let opop = imm(data);
                 let result = bcc(self, opop);
                 pc_inc_by = 2;
-                2 + result as u8 // + page boundary crossed
+                cyc_inc_by = 2 + result as u8 // + page boundary crossed;
             }
 
             0x91 => {
@@ -692,7 +693,7 @@ impl Cpu {
                 let (opop, add_cycle) = izy(cpu_map, data, self.y);
                 sta(self, cpu_map, opop);
                 pc_inc_by = 2;
-                5 + add_cycle as u8
+                cyc_inc_by = 5 + add_cycle as u8;
             }
 
             0x94 => {
@@ -700,7 +701,7 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 sty(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x95 => {
@@ -708,7 +709,7 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 sta(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x96 => {
@@ -716,13 +717,13 @@ impl Cpu {
                 let opop = zpy(data, self.y);
                 stx(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0x98 => {
                 tya(self);
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
 
             0x99 => {
@@ -730,14 +731,14 @@ impl Cpu {
                 let (opop, add_cycle) = aby(data, self.y);
                 sta(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0x9A => {
                 txs(self);
                 // TODO: review
                 pc_inc_by = 0;
-                2
+                cyc_inc_by = 2;
             }
 
             0x9D => {
@@ -745,7 +746,7 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 sta(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0xA0 => {
@@ -753,7 +754,7 @@ impl Cpu {
                 let opop = imm(data);
                 ldy(self, cpu_map, opop);
                 pc_inc_by = 2;
-                2
+                cyc_inc_by = 2;
             }
 
             0xA1 => {
@@ -761,7 +762,7 @@ impl Cpu {
                 let opop = izx(cpu_map, data, self.x);
                 lda(self, cpu_map, opop);
                 pc_inc_by = 2;
-                6
+                cyc_inc_by = 6;
             }
 
             0xA2 => {
@@ -769,7 +770,7 @@ impl Cpu {
                 let opop = imm(data);
                 ldx(self, cpu_map, opop);
                 pc_inc_by = 2;
-                2
+                cyc_inc_by = 2;
             }
 
             0xA4 => {
@@ -777,7 +778,7 @@ impl Cpu {
                 let opop = zp(data);
                 ldy(self, cpu_map, opop);
                 pc_inc_by = 2;
-                3
+                cyc_inc_by = 3;
             }
 
             0xA5 => {
@@ -785,7 +786,7 @@ impl Cpu {
                 let opop = zp(data);
                 lda(self, cpu_map, opop);
                 pc_inc_by = 2;
-                3
+                cyc_inc_by = 3;
             }
 
             0xA6 => {
@@ -793,13 +794,13 @@ impl Cpu {
                 let opop = zp(data);
                 ldx(self, cpu_map, opop);
                 pc_inc_by = 2;
-                3
+                cyc_inc_by = 3;
             }
 
             0xA8 => {
                 tay(self);
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
 
             0xA9 => {
@@ -807,13 +808,13 @@ impl Cpu {
                 let opop = imm(data);
                 lda(self, cpu_map, opop);
                 pc_inc_by = 2;
-                2
+                cyc_inc_by = 2;
             }
 
             0xAA => {
                 tax(self);
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
 
             0xAD => {
@@ -821,7 +822,7 @@ impl Cpu {
                 let opop = abs(data);
                 ldy(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0xAE => {
@@ -829,7 +830,7 @@ impl Cpu {
                 let opop = abs(data);
                 ldx(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0xB0 => {
@@ -837,7 +838,7 @@ impl Cpu {
                 let opop = imm(data);
                 let result = bcs(self, opop);
                 pc_inc_by = 2;
-                2 + result as u8 // + page boundary crossed
+                cyc_inc_by = 2 + result as u8 // + page boundary crossed;
             }
 
             0xB1 => {
@@ -845,7 +846,7 @@ impl Cpu {
                 let (opop, add_cycle) = izy(cpu_map, data, self.y);
                 lda(self, cpu_map, opop);
                 pc_inc_by = 2;
-                5 + add_cycle as u8
+                cyc_inc_by = 5 + add_cycle as u8;
             }
 
             0xB4 => {
@@ -853,7 +854,7 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 ldy(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xB5 => {
@@ -861,7 +862,7 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 lda(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xB6 => {
@@ -869,13 +870,13 @@ impl Cpu {
                 let opop = zpy(data, self.y);
                 ldx(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xB8 => {
                 clv(self);
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
 
             0xB9 => {
@@ -883,13 +884,13 @@ impl Cpu {
                 let (opop, add_cycle) = aby(data, self.y);
                 lda(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0xBA => {
                 tsx(self);
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
 
             0xBC => {
@@ -897,7 +898,7 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 ldy(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0xBD => {
@@ -905,7 +906,7 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 lda(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0xBE => {
@@ -913,7 +914,7 @@ impl Cpu {
                 let (opop, add_cycle) = aby(data, self.y);
                 ldx(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0xC0 => {
@@ -921,7 +922,7 @@ impl Cpu {
                 let opop = imm(data);
                 cpy(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xC1 => {
@@ -929,7 +930,7 @@ impl Cpu {
                 let opop = izx(cpu_map, data, self.x);
                 cmp(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xC4 => {
@@ -937,7 +938,7 @@ impl Cpu {
                 let opop = zp(data);
                 cpy(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xC5 => {
@@ -945,7 +946,7 @@ impl Cpu {
                 let opop = zp(data);
                 cmp(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xC6 => {
@@ -953,13 +954,13 @@ impl Cpu {
                 let opop = zp(data);
                 dec(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xC8 => {
                 iny(self);
                 pc_inc_by = 1;
-                4
+                cyc_inc_by = 4;
             }
 
             0xC9 => {
@@ -967,13 +968,13 @@ impl Cpu {
                 let opop = imm(data);
                 cmp(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xCA => {
                 dex(self);
                 pc_inc_by = 1;
-                4
+                cyc_inc_by = 4;
             }
 
             0xCC => {
@@ -981,7 +982,7 @@ impl Cpu {
                 let opop = abs(data);
                 cpy(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0xCD => {
@@ -989,7 +990,7 @@ impl Cpu {
                 let opop = abs(data);
                 cmp(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0xCE => {
@@ -997,7 +998,7 @@ impl Cpu {
                 let opop = abs(data);
                 dec(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0xD0 => {
@@ -1005,7 +1006,7 @@ impl Cpu {
                 let opop = imm(data);
                 let result = bne(self, opop);
                 pc_inc_by = 2;
-                2 + result as u8 // + page boundary crossed
+                cyc_inc_by = 2 + result as u8 // + page boundary crossed;
             }
 
             0xD1 => {
@@ -1013,7 +1014,7 @@ impl Cpu {
                 let (opop, add_cycle) = izy(cpu_map, data, self.x);
                 cmp(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0xD5 => {
@@ -1021,7 +1022,7 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 cmp(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xD6 => {
@@ -1029,13 +1030,13 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 dec(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xD8 => {
                 cld(self);
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
 
             0xD9 => {
@@ -1043,7 +1044,7 @@ impl Cpu {
                 let (opop, add_cycle) = aby(data, self.y);
                 cmp(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0xDD => {
@@ -1051,7 +1052,7 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 cmp(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0xDE => {
@@ -1059,7 +1060,7 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 dec(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0xE0 => {
@@ -1067,7 +1068,7 @@ impl Cpu {
                 let opop = imm(data);
                 cpx(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xE1 => {
@@ -1075,7 +1076,7 @@ impl Cpu {
                 let opop = izx(cpu_map, data, self.x);
                 sbc(self, cpu_map, opop);
                 pc_inc_by = 2;
-                6
+                cyc_inc_by = 6;
             }
 
             0xE4 => {
@@ -1083,7 +1084,7 @@ impl Cpu {
                 let opop = zp(data);
                 cpx(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xE5 => {
@@ -1091,7 +1092,7 @@ impl Cpu {
                 let opop = zp(data);
                 sbc(self, cpu_map, opop);
                 pc_inc_by = 2;
-                3
+                cyc_inc_by = 3;
             }
 
             0xE6 => {
@@ -1099,13 +1100,13 @@ impl Cpu {
                 let opop = zp(data);
                 inc(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xE8 => {
                 inx(self);
                 pc_inc_by = 1;
-                4
+                cyc_inc_by = 4;
             }
 
             0xE9 => {
@@ -1113,7 +1114,7 @@ impl Cpu {
                 let opop = imm(data);
                 sbc(self, cpu_map, opop);
                 pc_inc_by = 2;
-                2
+                cyc_inc_by = 2;
             }
 
             0xEC => {
@@ -1121,7 +1122,7 @@ impl Cpu {
                 let opop = abs(data);
                 cpx(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0xED => {
@@ -1129,7 +1130,7 @@ impl Cpu {
                 let opop = abs(data);
                 sbc(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0xEE => {
@@ -1137,7 +1138,7 @@ impl Cpu {
                 let opop = abs(data);
                 inc(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4
+                cyc_inc_by = 4;
             }
 
             0xF0 => {
@@ -1145,7 +1146,7 @@ impl Cpu {
                 let opop = imm(data);
                 let result = beq(self, opop);
                 pc_inc_by = 2;
-                2 + result as u8 // + page boundary crossed
+                cyc_inc_by = 2 + result as u8 // + page boundary crossed;
             }
 
             0xF1 => {
@@ -1153,7 +1154,7 @@ impl Cpu {
                 let (opop, add_cycle) = izy(cpu_map, data, self.y);
                 sbc(self, cpu_map, opop);
                 pc_inc_by = 2;
-                5 + add_cycle as u8
+                cyc_inc_by = 5 + add_cycle as u8;
             }
 
             0xF5 => {
@@ -1161,7 +1162,7 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 sbc(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xF6 => {
@@ -1169,13 +1170,13 @@ impl Cpu {
                 let opop = zpx(data, self.x);
                 inc(self, cpu_map, opop);
                 pc_inc_by = 2;
-                4
+                cyc_inc_by = 4;
             }
 
             0xF8 => {
                 sed(self);
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
 
             0xF9 => {
@@ -1183,7 +1184,7 @@ impl Cpu {
                 let (opop, add_cycle) = aby(data, self.y);
                 sbc(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0xFD => {
@@ -1191,7 +1192,7 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 sbc(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             0xFE => {
@@ -1199,24 +1200,24 @@ impl Cpu {
                 let (opop, add_cycle) = abx(data, self.x);
                 inc(self, cpu_map, opop);
                 pc_inc_by = 3;
-                4 + add_cycle as u8
+                cyc_inc_by = 4 + add_cycle as u8;
             }
             0x02 | 0x12 | 0x22 | 0x32 | 0x42 | 0x52 | 0x62 | 0x72 | 0x92 | 0xB2 | 0xD2 | 0xF2 => {
                 self.halt = true;
                 pc_inc_by = 0;
-                4
+                cyc_inc_by = 4;
             }
             0x1A | 0x3A | 0x5A | 0x7A | 0x80 | 0x82 | 0x89 | 0xC2 | 0xDA | 0xE2 | 0xEA | 0xFA => {
                 pc_inc_by = 1;
-                2
+                cyc_inc_by = 2;
             }
             0x04 | 0x44 | 0x64 => {
                 pc_inc_by = 1;
-                3
+                cyc_inc_by = 3;
             }
             0x0C | 0x14 | 0x1C | 0x34 | 0x3C | 0x54 | 0x5C | 0x74 | 0x7C | 0xD4 | 0xDC | 0xF4 => {
                 pc_inc_by = 1;
-                4
+                cyc_inc_by = 4;
             }
 
             // Shouldn't ever happen.
@@ -1227,6 +1228,6 @@ impl Cpu {
         };
 
         self.pc += pc_inc_by;
-        time_passed
+        cyc_inc_by
     }
 }

@@ -1207,7 +1207,7 @@ impl Cpu {
                 4
             }
             0x1A | 0x3A | 0x5A | 0x7A | 0x80 | 0x82 | 0x89 | 0xC2 | 0xDA | 0xE2 | 0xEA | 0xFA => {
-                pc_inc_by = 0;
+                pc_inc_by = 1;
                 2
             }
             0x04 | 0x44 | 0x64 => {

@@ -534,10 +534,9 @@ pub fn jmp(cpu: &mut Cpu, addr: u16) {
     cpu.pc = addr;
 }
 
-//review this, notation used was weird
-pub fn bit(cpu: &mut Cpu, addr: u16) {
-    let acc = cpu.acc as u16;
-    cpu.set_flag_value(ProcessorStatusFlag::Negative, (addr >> 7) & 1 == 1);
-    cpu.set_flag_value(ProcessorStatusFlag::Overflow, ((addr >> 6) & 1) == 1);
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, acc & addr == 0);
+pub fn bit(cpu: &mut Cpu, addr: u16, cpu_map: &dyn GetSet) {
+    let val = cpu_map.get(addr);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, (val >> 7) & 1 == 1);
+    cpu.set_flag_value(ProcessorStatusFlag::Overflow, ((val >> 6) & 1) == 1);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.acc & val == 0);
 }

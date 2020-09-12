@@ -217,7 +217,7 @@ impl Cpu {
             0x24 => {
                 let operand = cpu_map.get(self.pc + 1);
                 let addr = zp(operand);
-                bit(self, addr);
+                bit(self, addr, cpu_map);
                 pc_inc_by = 2;
                 cyc_inc_by = 3;
             }
@@ -260,7 +260,7 @@ impl Cpu {
             0x2C => {
                 let operand = cpu_map.get_16(self.pc + 1);
                 let addr = abs(operand);
-                bit(self, addr);
+                bit(self, addr, cpu_map);
                 pc_inc_by = 3;
                 cyc_inc_by = 4;
             }

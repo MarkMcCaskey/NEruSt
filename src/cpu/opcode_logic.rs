@@ -4,7 +4,7 @@ use crate::getset::GetSet;
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Load register opcodes
-pub fn lda(val: u8, cpu: &mut Cpu) {
+pub fn lda(cpu: &mut Cpu, val: u8) {
     cpu.acc = val;
 
     let zero_flag: bool = cpu.acc == 0;
@@ -13,7 +13,7 @@ pub fn lda(val: u8, cpu: &mut Cpu) {
     cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
 }
 
-pub fn ldx(val: u8, cpu: &mut Cpu) {
+pub fn ldx(cpu: &mut Cpu, val: u8) {
     cpu.x = val;
 
     let zero_flag: bool = cpu.x == 0;
@@ -22,7 +22,7 @@ pub fn ldx(val: u8, cpu: &mut Cpu) {
     cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
 }
 
-pub fn ldy(val: u8, cpu: &mut Cpu) {
+pub fn ldy(cpu: &mut Cpu, val: u8) {
     cpu.y = val;
 
     let zero_flag: bool = cpu.y == 0;
@@ -34,32 +34,32 @@ pub fn ldy(val: u8, cpu: &mut Cpu) {
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Set cpu_mapdes
-pub fn sta(addr: u16, cpu: &Cpu, cpu_map: &mut dyn GetSet) {
+pub fn sta(cpu: &Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
     cpu_map.set(addr, cpu.acc);
 }
 
-pub fn stx(addr: u16, cpu: &Cpu, cpu_map: &mut dyn GetSet) {
+pub fn stx(cpu: &Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
     cpu_map.set(addr, cpu.x);
 }
 
-pub fn sty(addr: u16, cpu: &Cpu, cpu_map: &mut dyn GetSet) {
+pub fn sty(cpu: &Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
     cpu_map.set(addr, cpu.y);
 }
 
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Bitwise opcodes
-pub fn eor(val: u8, cpu: &mut Cpu) {
+pub fn eor(cpu: &mut Cpu, val: u8) {
     cpu.acc ^= val;
     cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.acc == 0);
 }
 
-pub fn and(val: u8, cpu: &mut Cpu) {
+pub fn and(cpu: &mut Cpu, val: u8) {
     cpu.acc &= val;
     cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.acc == 0);
 }
 
-pub fn ora(val: u8, cpu: &mut Cpu) {
+pub fn ora(cpu: &mut Cpu, val: u8) {
     cpu.acc |= val;
     cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.acc == 0);
 }
@@ -206,7 +206,7 @@ pub fn iny(cpu: &mut Cpu) {
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Math opcodes
-pub fn adc(val: u8, cpu: &mut Cpu) {
+pub fn adc(cpu: &mut Cpu, val: u8) {
     let old_acc = cpu.acc;
     cpu.acc = cpu.acc.wrapping_add(val);
 
@@ -221,7 +221,7 @@ pub fn adc(val: u8, cpu: &mut Cpu) {
     cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
 }
 
-pub fn sbc(val: u8, cpu: &mut Cpu) {
+pub fn sbc(cpu: &mut Cpu, val: u8) {
     let old_acc: u8 = cpu.acc;
     cpu.acc = cpu.acc.wrapping_sub(val);
 
@@ -255,7 +255,7 @@ pub fn rol_imp(cpu: &mut Cpu) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-pub fn rol(addr: u16, cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
+pub fn rol(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
     let (old_val, new_val) = {
         let old_val = cpu_map.get(addr);
         let mut temp = old_val;
@@ -289,7 +289,7 @@ pub fn ror_imp(cpu: &mut Cpu) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-pub fn ror(addr: u16, cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
+pub fn ror(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
     let (old_val, new_val) = {
         let old_val = cpu_map.get(addr);
         let mut temp = old_val;
@@ -322,7 +322,7 @@ pub fn lsr_imp(cpu: &mut Cpu) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-pub fn lsr(addr: u16, cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
+pub fn lsr(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
     let (old_val, new_val) = {
         let old_val = cpu_map.get(addr);
         let mut temp = old_val;
@@ -354,7 +354,7 @@ pub fn asl_imp(cpu: &mut Cpu) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-pub fn asl(addr: u16, cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
+pub fn asl(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
     let (old_val, new_val) = {
         let old_val = cpu_map.get(addr);
         let mut temp = old_val;
@@ -395,19 +395,19 @@ fn common_cmp(cpu: &mut Cpu, first: u8, second: u8) {
     }
 }
 
-pub fn cmp(val: u8, cpu: &mut Cpu) {
+pub fn cmp(cpu: &mut Cpu, val: u8) {
     common_cmp(cpu, cpu.acc, val);
 }
 
-pub fn cpx(val: u8, cpu: &mut Cpu) {
+pub fn cpx(cpu: &mut Cpu, val: u8) {
     common_cmp(cpu, cpu.x, val)
 }
 
-pub fn cpy(val: u8, cpu: &mut Cpu) {
+pub fn cpy(cpu: &mut Cpu, val: u8) {
     common_cmp(cpu, cpu.y, val)
 }
 
-pub fn dec(addr: u16, cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
+pub fn dec(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
     let new_value = cpu_map.get(addr).wrapping_sub(1);
     cpu_map.set(addr, new_value);
 
@@ -415,7 +415,7 @@ pub fn dec(addr: u16, cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
     cpu.set_flag_value(ProcessorStatusFlag::Negative, new_value & 0x80 == 0x80);
 }
 
-pub fn inc(addr: u16, cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
+pub fn inc(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
     let new_value = cpu_map.get(addr).wrapping_add(1);
     cpu_map.set(addr, new_value);
 
@@ -424,7 +424,7 @@ pub fn inc(addr: u16, cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
 }
 
 // Branching
-pub fn bpl(val: u8, cpu: &mut Cpu) -> bool {
+pub fn bpl(cpu: &mut Cpu, val: u8) -> bool {
     let negative = cpu.get_processor_status_flag(ProcessorStatusFlag::Negative);
     if !negative {
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
@@ -433,7 +433,7 @@ pub fn bpl(val: u8, cpu: &mut Cpu) -> bool {
     !negative
 }
 
-pub fn bmi(val: u8, cpu: &mut Cpu) -> bool {
+pub fn bmi(cpu: &mut Cpu, val: u8) -> bool {
     let negative = cpu.get_processor_status_flag(ProcessorStatusFlag::Negative);
     if negative {
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
@@ -442,7 +442,7 @@ pub fn bmi(val: u8, cpu: &mut Cpu) -> bool {
     negative
 }
 
-pub fn bvc(val: u8, cpu: &mut Cpu) -> bool {
+pub fn bvc(cpu: &mut Cpu, val: u8) -> bool {
     let overflow = cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow);
     if !overflow {
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
@@ -451,7 +451,7 @@ pub fn bvc(val: u8, cpu: &mut Cpu) -> bool {
     !overflow
 }
 
-pub fn bvs(val: u8, cpu: &mut Cpu) -> bool {
+pub fn bvs(cpu: &mut Cpu, val: u8) -> bool {
     let overflow = cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow);
     if overflow {
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
@@ -460,7 +460,7 @@ pub fn bvs(val: u8, cpu: &mut Cpu) -> bool {
     overflow
 }
 
-pub fn bcc(val: u8, cpu: &mut Cpu) -> bool {
+pub fn bcc(cpu: &mut Cpu, val: u8) -> bool {
     let carry = cpu.get_processor_status_flag(ProcessorStatusFlag::Carry);
     if !carry {
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
@@ -469,7 +469,7 @@ pub fn bcc(val: u8, cpu: &mut Cpu) -> bool {
     !carry
 }
 
-pub fn bcs(val: u8, cpu: &mut Cpu) -> bool {
+pub fn bcs(cpu: &mut Cpu, val: u8) -> bool {
     let carry = cpu.get_processor_status_flag(ProcessorStatusFlag::Carry);
     if carry {
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
@@ -478,7 +478,7 @@ pub fn bcs(val: u8, cpu: &mut Cpu) -> bool {
     carry
 }
 
-pub fn bne(val: u8, cpu: &mut Cpu) -> bool {
+pub fn bne(cpu: &mut Cpu, val: u8) -> bool {
     let zero = cpu.get_processor_status_flag(ProcessorStatusFlag::Zero);
     if !zero {
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
@@ -487,7 +487,7 @@ pub fn bne(val: u8, cpu: &mut Cpu) -> bool {
     !zero
 }
 
-pub fn beq(val: u8, cpu: &mut Cpu) -> bool {
+pub fn beq(cpu: &mut Cpu, val: u8) -> bool {
     let zero = cpu.get_processor_status_flag(ProcessorStatusFlag::Zero);
     if zero {
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
@@ -515,7 +515,7 @@ pub fn rti(cpu: &mut Cpu, cpu_map: &dyn GetSet) {
     cpu.s += 3;
 }
 
-pub fn jsr(addr: u16, cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
+pub fn jsr(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
     let idx = cpu.s;
     cpu_map.set(idx as u16, cpu.pc as u8);
     cpu_map.set(idx as u16 - 1, (cpu.pc >> 8) as u8);
@@ -530,12 +530,12 @@ pub fn rts(cpu: &mut Cpu, cpu_map: &dyn GetSet) {
     cpu.s += 2;
 }
 
-pub fn jmp(addr: u16, cpu: &mut Cpu) {
+pub fn jmp(cpu: &mut Cpu, addr: u16) {
     cpu.pc = addr;
 }
 
 //review this, notation used was weird
-pub fn bit(addr: u16, cpu: &mut Cpu) {
+pub fn bit(cpu: &mut Cpu, addr: u16) {
     let acc = cpu.acc as u16;
     cpu.set_flag_value(ProcessorStatusFlag::Negative, (addr >> 7) & 1 == 1);
     cpu.set_flag_value(ProcessorStatusFlag::Overflow, ((addr >> 6) & 1) == 1);

@@ -11,3 +11,13 @@ pub trait GetSet {
     /// Write 1 byte to the memory at the given address..
     fn set(&mut self, address: u16, value: u8);
 }
+
+impl<T: GetSet> GetSet for &mut T {
+    fn get(&self, address: u16) -> u8 {
+        (*self).get(address)
+    }
+
+    fn set(&mut self, address: u16, value: u8) {
+        (*self).set(address, value)
+    }
+}

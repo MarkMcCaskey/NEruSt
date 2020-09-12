@@ -1,13 +1,13 @@
 use crate::getset::GetSet;
 
-pub struct CpuMap<'a> {
-    pub ram: &'a mut dyn GetSet,
-    pub ppu: &'a mut dyn GetSet,
-    pub io: &'a mut dyn GetSet,
+pub struct CpuMap<'a, RAM: GetSet, PPU: GetSet, IO: GetSet> {
+    pub ram: &'a mut RAM,
+    pub ppu: &'a mut PPU,
+    pub io: &'a mut IO,
     pub cart: &'a mut dyn GetSet,
 }
 
-impl<'a> GetSet for CpuMap<'a> {
+impl<'a, RAM: GetSet, PPU: GetSet, IO: GetSet> GetSet for CpuMap<'a, RAM, PPU, IO> {
     fn get(&self, addr: u16) -> u8 {
         match addr {
             0x0000..=0x1FFF => self.ram.get(addr),

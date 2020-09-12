@@ -1,16 +1,11 @@
-use crate::cpu::addressing_modes::OpcodeOperand;
 use crate::cpu::cpu::{Cpu, ProcessorStatusFlag};
 use crate::getset::GetSet;
 
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Load register opcodes
-pub fn lda(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
-    match opop {
-        OpcodeOperand::Implied => unreachable!(),
-        OpcodeOperand::Immediate(val) => cpu.acc = val,
-        OpcodeOperand::Address(adr) => cpu.acc = cpu_map.get(adr),
-    };
+pub fn lda(cpu: &mut Cpu, val: u8) {
+    cpu.acc = val;
 
     let zero_flag: bool = cpu.acc == 0;
     let negative_flag: bool = cpu.acc & 0x80 == 0x80;
@@ -18,12 +13,8 @@ pub fn lda(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
 }
 
-pub fn ldx(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
-    match opop {
-        OpcodeOperand::Implied => unreachable!(),
-        OpcodeOperand::Immediate(val) => cpu.x = val,
-        OpcodeOperand::Address(adr) => cpu.x = cpu_map.get(adr),
-    };
+pub fn ldx(cpu: &mut Cpu, val: u8) {
+    cpu.x = val;
 
     let zero_flag: bool = cpu.x == 0;
     let negative_flag: bool = cpu.x & 0x80 == 0x80;
@@ -31,12 +22,8 @@ pub fn ldx(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
 }
 
-pub fn ldy(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
-    match opop {
-        OpcodeOperand::Implied => unreachable!(),
-        OpcodeOperand::Immediate(val) => cpu.y = val,
-        OpcodeOperand::Address(adr) => cpu.y = cpu_map.get(adr),
-    };
+pub fn ldy(cpu: &mut Cpu, val: u8) {
+    cpu.y = val;
 
     let zero_flag: bool = cpu.y == 0;
     let negative_flag: bool = cpu.y & 0x80 == 0x80;
@@ -47,70 +34,34 @@ pub fn ldy(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Set cpu_mapdes
-pub fn sta(cpu: &Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
-    match opop {
-        OpcodeOperand::Implied => unreachable!(),
-        OpcodeOperand::Immediate(_) => unreachable!(),
-        OpcodeOperand::Address(adr) => cpu_map.set(adr, cpu.acc),
-    };
-
-    // no flags to be set
+pub fn sta(cpu: &Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
+    cpu_map.set(addr, cpu.acc);
 }
 
-pub fn stx(cpu: &Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
-    match opop {
-        OpcodeOperand::Implied => unreachable!(),
-        OpcodeOperand::Immediate(_) => unreachable!(),
-        OpcodeOperand::Address(adr) => cpu_map.set(adr, cpu.x),
-    };
-
-    // no flags to be set
+pub fn stx(cpu: &Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
+    cpu_map.set(addr, cpu.x);
 }
 
-pub fn sty(cpu: &Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
-    match opop {
-        OpcodeOperand::Implied => unreachable!(),
-        OpcodeOperand::Immediate(_) => unreachable!(),
-        OpcodeOperand::Address(adr) => cpu_map.set(adr, cpu.y),
-    };
-
-    // no flags to be set
+pub fn sty(cpu: &Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
+    cpu_map.set(addr, cpu.y);
 }
 
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Bitwise opcodes
-pub fn eor(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
-    match opop {
-        OpcodeOperand::Implied => unreachable!(),
-        OpcodeOperand::Immediate(val) => cpu.acc ^= val,
-        OpcodeOperand::Address(adr) => cpu.acc ^= cpu_map.get(adr),
-    };
-
-    let zero_flag = cpu.acc == 0;
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
+pub fn eor(cpu: &mut Cpu, val: u8) {
+    cpu.acc ^= val;
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.acc == 0);
 }
 
-pub fn and(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
-    match opop {
-        OpcodeOperand::Implied => unreachable!(),
-        OpcodeOperand::Immediate(val) => cpu.acc &= val,
-        OpcodeOperand::Address(adr) => cpu.acc &= cpu_map.get(adr),
-    };
-
-    let zero_flag = cpu.acc == 0;
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
+pub fn and(cpu: &mut Cpu, val: u8) {
+    cpu.acc &= val;
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.acc == 0);
 }
 
-pub fn ora(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
-    match opop {
-        OpcodeOperand::Implied => unreachable!(),
-        OpcodeOperand::Immediate(val) => cpu.acc |= val,
-        OpcodeOperand::Address(adr) => cpu.acc |= cpu_map.get(adr),
-    };
-
-    let zero_flag = cpu.acc == 0;
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
+pub fn ora(cpu: &mut Cpu, val: u8) {
+    cpu.acc |= val;
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.acc == 0);
 }
 
 //////////////////////////////////////////////////
@@ -255,19 +206,9 @@ pub fn iny(cpu: &mut Cpu) {
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Math opcodes
-pub fn adc(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
-    let old_acc: u8 = cpu.acc;
-    let val: u8 = match opop {
-        OpcodeOperand::Implied => unreachable!(),
-        OpcodeOperand::Immediate(val) => {
-            cpu.acc.wrapping_add(val);
-            val
-        }
-        OpcodeOperand::Address(adr) => {
-            cpu.acc.wrapping_add(cpu_map.get(adr));
-            cpu_map.get(adr)
-        }
-    };
+pub fn adc(cpu: &mut Cpu, val: u8) {
+    let old_acc = cpu.acc;
+    cpu.acc = cpu.acc.wrapping_add(val);
 
     let negative_flag = cpu.acc & 0x80 == 0x80;
     let overflow_flag =
@@ -280,19 +221,9 @@ pub fn adc(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
 }
 
-pub fn sbc(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
+pub fn sbc(cpu: &mut Cpu, val: u8) {
     let old_acc: u8 = cpu.acc;
-    let val: u8 = match opop {
-        OpcodeOperand::Implied => unreachable!(),
-        OpcodeOperand::Immediate(val) => {
-            cpu.acc.wrapping_sub(val);
-            val
-        }
-        OpcodeOperand::Address(adr) => {
-            cpu.acc.wrapping_sub(cpu_map.get(adr));
-            cpu_map.get(adr)
-        }
-    };
+    cpu.acc = cpu.acc.wrapping_sub(val);
 
     let negative_flag = cpu.acc & 0x80 == 0x80;
     let overflow_flag =
@@ -308,23 +239,12 @@ pub fn sbc(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 ///// Shift opcodes
-pub fn rol(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
-    let (old_val, new_val) = match opop {
-        OpcodeOperand::Implied => {
-            let old_val = cpu.acc;
-            cpu.acc <<= 1;
-            cpu.acc |= cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
-            (old_val, cpu.acc)
-        }
-        OpcodeOperand::Immediate(_) => unreachable!(),
-        OpcodeOperand::Address(adr) => {
-            let old_val = cpu_map.get(adr);
-            let mut temp = old_val;
-            temp <<= 1;
-            temp |= cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
-            cpu_map.set(adr, temp);
-            (old_val, temp)
-        }
+pub fn rol_imp(cpu: &mut Cpu) {
+    let (old_val, new_val) = {
+        let old_val = cpu.acc;
+        cpu.acc <<= 1;
+        cpu.acc |= cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
+        (old_val, cpu.acc)
     };
 
     let negative_flag = new_val & 0x80 == 0x80;
@@ -335,23 +255,30 @@ pub fn rol(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-pub fn ror(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
-    let (old_val, new_val) = match opop {
-        OpcodeOperand::Implied => {
-            let old_val = cpu.acc;
-            cpu.acc >>= 1;
-            cpu.acc |= cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
-            (old_val, cpu.acc)
-        }
-        OpcodeOperand::Immediate(_) => unreachable!(),
-        OpcodeOperand::Address(adr) => {
-            let old_val = cpu_map.get(adr);
-            let mut temp = old_val;
-            temp >>= 1;
-            temp |= (cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8) << 7;
-            cpu_map.set(adr, temp);
-            (old_val, temp)
-        }
+pub fn rol(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
+    let (old_val, new_val) = {
+        let old_val = cpu_map.get(addr);
+        let mut temp = old_val;
+        temp <<= 1;
+        temp |= cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
+        cpu_map.set(addr, temp);
+        (old_val, temp)
+    };
+
+    let negative_flag = new_val & 0x80 == 0x80;
+    let zero_flag = new_val == 0;
+    let carry_flag = old_val & 0x80 == 0x80;
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
+    cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
+}
+
+pub fn ror_imp(cpu: &mut Cpu) {
+    let (old_val, new_val) = {
+        let old_val = cpu.acc;
+        cpu.acc >>= 1;
+        cpu.acc |= cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
+        (old_val, cpu.acc)
     };
 
     let negative_flag = new_val & 0x80 == 0x80;
@@ -362,21 +289,14 @@ pub fn ror(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-pub fn lsr(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
-    let (old_val, new_val) = match opop {
-        OpcodeOperand::Implied => {
-            let old_val = cpu.acc;
-            cpu.acc >>= 1;
-            (old_val, cpu.acc)
-        }
-        OpcodeOperand::Immediate(_) => unreachable!(),
-        OpcodeOperand::Address(adr) => {
-            let old_val = cpu_map.get(adr);
-            let mut temp = old_val;
-            temp >>= 1;
-            cpu_map.set(adr, temp);
-            (old_val, temp)
-        }
+pub fn ror(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
+    let (old_val, new_val) = {
+        let old_val = cpu_map.get(addr);
+        let mut temp = old_val;
+        temp >>= 1;
+        temp |= (cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8) << 7;
+        cpu_map.set(addr, temp);
+        (old_val, temp)
     };
 
     let negative_flag = new_val & 0x80 == 0x80;
@@ -387,21 +307,60 @@ pub fn lsr(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
     cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
 }
 
-pub fn asl(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
-    let (old_val, new_val) = match opop {
-        OpcodeOperand::Implied => {
-            let old_val = cpu.acc;
-            cpu.acc <<= 1;
-            (old_val, cpu.acc)
-        }
-        OpcodeOperand::Immediate(_) => unreachable!(),
-        OpcodeOperand::Address(adr) => {
-            let old_val = cpu_map.get(adr);
-            let mut temp = old_val;
-            temp <<= 1;
-            cpu_map.set(adr, temp);
-            (old_val, temp)
-        }
+pub fn lsr_imp(cpu: &mut Cpu) {
+    let (old_val, new_val) = {
+        let old_val = cpu.acc;
+        cpu.acc >>= 1;
+        (old_val, cpu.acc)
+    };
+
+    let negative_flag = new_val & 0x80 == 0x80;
+    let zero_flag = new_val == 0;
+    let carry_flag = old_val & 0x01 == 0x01;
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
+    cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
+}
+
+pub fn lsr(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
+    let (old_val, new_val) = {
+        let old_val = cpu_map.get(addr);
+        let mut temp = old_val;
+        temp >>= 1;
+        cpu_map.set(addr, temp);
+        (old_val, temp)
+    };
+
+    let negative_flag = new_val & 0x80 == 0x80;
+    let zero_flag = new_val == 0;
+    let carry_flag = old_val & 0x01 == 0x01;
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
+    cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
+}
+
+pub fn asl_imp(cpu: &mut Cpu) {
+    let (old_val, new_val) = {
+        let old_val = cpu.acc;
+        cpu.acc <<= 1;
+        (old_val, cpu.acc)
+    };
+
+    let negative_flag = new_val & 0x80 == 0x80;
+    let zero_flag = new_val == 0;
+    let carry_flag = old_val & 0x80 == 0x80;
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
+    cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
+}
+
+pub fn asl(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
+    let (old_val, new_val) = {
+        let old_val = cpu_map.get(addr);
+        let mut temp = old_val;
+        temp <<= 1;
+        cpu_map.set(addr, temp);
+        (old_val, temp)
     };
 
     let negative_flag = new_val & 0x80 == 0x80;
@@ -436,174 +395,102 @@ fn common_cmp(cpu: &mut Cpu, first: u8, second: u8) {
     }
 }
 
-pub fn cmp(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
-    let value = match opop {
-        OpcodeOperand::Address(addr) => cpu_map.get(addr),
-        OpcodeOperand::Immediate(imm) => imm,
-        OpcodeOperand::Implied => unreachable!("Cmp doesn't have a default to compare to"),
-    };
-    let first_val = cpu.acc;
-    common_cmp(cpu, first_val, value)
+pub fn cmp(cpu: &mut Cpu, val: u8) {
+    common_cmp(cpu, cpu.acc, val);
 }
 
-pub fn cpx(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
-    let value = match opop {
-        OpcodeOperand::Address(addr) => cpu_map.get(addr),
-        OpcodeOperand::Immediate(imm) => imm,
-        OpcodeOperand::Implied => unreachable!("cpx doesn't have a default to compare to"),
-    };
-    let first_val = cpu.x;
-    common_cmp(cpu, first_val, value)
+pub fn cpx(cpu: &mut Cpu, val: u8) {
+    common_cmp(cpu, cpu.x, val)
 }
 
-pub fn cpy(cpu: &mut Cpu, cpu_map: &dyn GetSet, opop: OpcodeOperand) {
-    let value = match opop {
-        OpcodeOperand::Address(addr) => cpu_map.get(addr),
-        OpcodeOperand::Immediate(imm) => imm,
-        OpcodeOperand::Implied => unreachable!("cpy doesn't have a default to compare to"),
-    };
-    let first_val = cpu.y;
-    common_cmp(cpu, first_val, value)
+pub fn cpy(cpu: &mut Cpu, val: u8) {
+    common_cmp(cpu, cpu.y, val)
 }
 
-pub fn dec(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
-    let new_value = match opop {
-        OpcodeOperand::Address(addr) => {
-            let val = cpu_map.get(addr).wrapping_sub(1);
-            cpu_map.set(addr, val);
-            val
-        }
-        OpcodeOperand::Immediate(_) => unreachable!("immediate values cannot be decremented"),
-        OpcodeOperand::Implied => unreachable!("dec doesn't have a default"),
-    };
+pub fn dec(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
+    let new_value = cpu_map.get(addr).wrapping_sub(1);
+    cpu_map.set(addr, new_value);
 
     cpu.set_flag_value(ProcessorStatusFlag::Zero, new_value == 0);
     cpu.set_flag_value(ProcessorStatusFlag::Negative, new_value & 0x80 == 0x80);
 }
 
-pub fn inc(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
-    let new_value = match opop {
-        OpcodeOperand::Address(addr) => {
-            let val = cpu_map.get(addr).wrapping_add(1);
-            cpu_map.set(addr, val);
-            val
-        }
-        OpcodeOperand::Immediate(_) => unreachable!("immediate values cannot be decremented"),
-        OpcodeOperand::Implied => unreachable!("dec doesn't have a default"),
-    };
+pub fn inc(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
+    let new_value = cpu_map.get(addr).wrapping_add(1);
+    cpu_map.set(addr, new_value);
 
     cpu.set_flag_value(ProcessorStatusFlag::Zero, new_value == 0);
     cpu.set_flag_value(ProcessorStatusFlag::Negative, new_value & 0x80 == 0x80);
 }
 
 // Branching
-pub fn bpl(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+pub fn bpl(cpu: &mut Cpu, val: u8) -> bool {
     let negative = cpu.get_processor_status_flag(ProcessorStatusFlag::Negative);
     if !negative {
-        match opop {
-            OpcodeOperand::Immediate(v) => {
-                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
-            }
-            _ => unreachable!("invalid bpl argument"),
-        }
+        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
     }
 
     !negative
 }
 
-pub fn bmi(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+pub fn bmi(cpu: &mut Cpu, val: u8) -> bool {
     let negative = cpu.get_processor_status_flag(ProcessorStatusFlag::Negative);
     if negative {
-        match opop {
-            OpcodeOperand::Immediate(v) => {
-                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
-            }
-            _ => unreachable!("invalid bmi argument"),
-        }
+        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
     }
 
     negative
 }
 
-pub fn bvc(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+pub fn bvc(cpu: &mut Cpu, val: u8) -> bool {
     let overflow = cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow);
     if !overflow {
-        match opop {
-            OpcodeOperand::Immediate(v) => {
-                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
-            }
-            _ => unreachable!("invalid bvc argument"),
-        }
+        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
     }
 
     !overflow
 }
 
-pub fn bvs(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+pub fn bvs(cpu: &mut Cpu, val: u8) -> bool {
     let overflow = cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow);
     if overflow {
-        match opop {
-            OpcodeOperand::Immediate(v) => {
-                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
-            }
-            _ => unreachable!("invalid bvs argument"),
-        }
+        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
     }
 
     overflow
 }
 
-pub fn bcc(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+pub fn bcc(cpu: &mut Cpu, val: u8) -> bool {
     let carry = cpu.get_processor_status_flag(ProcessorStatusFlag::Carry);
     if !carry {
-        match opop {
-            OpcodeOperand::Immediate(v) => {
-                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
-            }
-            _ => unreachable!("invalid bcc argument"),
-        }
+        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
     }
 
     !carry
 }
 
-pub fn bcs(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+pub fn bcs(cpu: &mut Cpu, val: u8) -> bool {
     let carry = cpu.get_processor_status_flag(ProcessorStatusFlag::Carry);
     if carry {
-        match opop {
-            OpcodeOperand::Immediate(v) => {
-                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
-            }
-            _ => unreachable!("invalid bcs argument"),
-        }
+        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
     }
 
     carry
 }
 
-pub fn bne(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+pub fn bne(cpu: &mut Cpu, val: u8) -> bool {
     let zero = cpu.get_processor_status_flag(ProcessorStatusFlag::Zero);
     if !zero {
-        match opop {
-            OpcodeOperand::Immediate(v) => {
-                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
-            }
-            _ => unreachable!("invalid bne argument"),
-        }
+        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
     }
 
     !zero
 }
 
-pub fn beq(cpu: &mut Cpu, opop: OpcodeOperand) -> bool {
+pub fn beq(cpu: &mut Cpu, val: u8) -> bool {
     let zero = cpu.get_processor_status_flag(ProcessorStatusFlag::Zero);
     if zero {
-        match opop {
-            OpcodeOperand::Immediate(v) => {
-                cpu.pc = (cpu.pc as i16 + v as i16) as u16;
-            }
-            _ => unreachable!("invalid beq argument"),
-        }
+        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
     }
 
     zero
@@ -628,17 +515,12 @@ pub fn rti(cpu: &mut Cpu, cpu_map: &dyn GetSet) {
     cpu.s += 3;
 }
 
-pub fn jsr(cpu: &mut Cpu, cpu_map: &mut dyn GetSet, opop: OpcodeOperand) {
+pub fn jsr(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
     let idx = cpu.s;
     cpu_map.set(idx as u16, cpu.pc as u8);
     cpu_map.set(idx as u16 - 1, (cpu.pc >> 8) as u8);
     cpu.s -= 2;
-    match opop {
-        OpcodeOperand::Address(addr) => {
-            cpu.pc = addr;
-        }
-        _ => unreachable!(),
-    }
+    cpu.pc = addr
 }
 
 pub fn rts(cpu: &mut Cpu, cpu_map: &dyn GetSet) {
@@ -648,24 +530,14 @@ pub fn rts(cpu: &mut Cpu, cpu_map: &dyn GetSet) {
     cpu.s += 2;
 }
 
-pub fn jmp(cpu: &mut Cpu, opop: OpcodeOperand) {
-    match opop {
-        OpcodeOperand::Address(addr) => {
-            cpu.pc = addr;
-        }
-        _ => unreachable!(),
-    }
+pub fn jmp(cpu: &mut Cpu, addr: u16) {
+    cpu.pc = addr;
 }
 
 //review this, notation used was weird
-pub fn bit(cpu: &mut Cpu, opop: OpcodeOperand) {
+pub fn bit(cpu: &mut Cpu, addr: u16) {
     let acc = cpu.acc as u16;
-    match opop {
-        OpcodeOperand::Address(addr) => {
-            cpu.set_flag_value(ProcessorStatusFlag::Negative, (addr >> 7) & 1 == 1);
-            cpu.set_flag_value(ProcessorStatusFlag::Overflow, ((addr >> 6) & 1) == 1);
-            cpu.set_flag_value(ProcessorStatusFlag::Zero, acc & addr == 0);
-        }
-        _ => unreachable!(),
-    }
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, (addr >> 7) & 1 == 1);
+    cpu.set_flag_value(ProcessorStatusFlag::Overflow, ((addr >> 6) & 1) == 1);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, acc & addr == 0);
 }

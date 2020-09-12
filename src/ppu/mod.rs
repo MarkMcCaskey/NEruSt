@@ -59,7 +59,11 @@ impl Ppu {
     }
 
     /// Returns the number of cycles that have passed.
-    pub fn run_instruction<MEM: GetSet, MAP: GetSet>(&mut self, ppu_mem: MEM, ppu_map: MAP) -> u8 {
+    pub fn run_instruction<MEM: GetSet, MAP: GetSet>(
+        &mut self,
+        ppu_mem: &mut MEM,
+        ppu_map: &mut MAP,
+    ) -> u8 {
         0
     }
 }

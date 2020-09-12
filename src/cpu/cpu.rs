@@ -66,7 +66,7 @@ impl Cpu {
         (self.p & flag_bit) == flag_bit
     }
 
-    pub fn run_instruction(&mut self, cpu_map: &mut dyn GetSet) -> u8 {
+    pub fn run_instruction<CPU_MAP: GetSet>(&mut self, cpu_map: &mut CPU_MAP) -> u8 {
         let op = cpu_map.get(self.pc);
 
         let pc_inc_by;

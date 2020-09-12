@@ -1,75 +1,48 @@
 use crate::getset::GetSet;
 
-#[derive(Debug, Clone, Copy)]
-pub enum OpcodeOperand {
-    Implied,
-    Immediate(u8),
-    Address(u16),
+// Imp is empty
+
+// Imm is empty
+
+pub fn zp(addr: u8) -> u16 {
+    addr as u16
 }
 
-#[inline(always)]
-pub fn imp() -> OpcodeOperand {
-    OpcodeOperand::Implied
+pub fn zpx(addr: u8, x: u8) -> u16 {
+    addr.wrapping_add(x) as u16
 }
 
-#[inline(always)]
-pub fn imm(val: u8) -> OpcodeOperand {
-    OpcodeOperand::Immediate(val)
+pub fn zpy(addr: u8, y: u8) -> u16 {
+    addr.wrapping_add(y) as u16
 }
 
-#[inline(always)]
-pub fn zp(adr: u8) -> OpcodeOperand {
-    OpcodeOperand::Address(adr.into())
+pub fn izx(addr: u8, x: u8, cpu_map: &dyn GetSet) -> u16 {
+    cpu_map.get_16(addr.wrapping_add(x) as u16)
 }
 
-pub fn zpx(adr: u8, x: u8) -> OpcodeOperand {
-    let indexed_adr: u8 = adr.wrapping_add(x);
-    OpcodeOperand::Address(indexed_adr.into())
-}
-
-pub fn zpy(adr: u8, y: u8) -> OpcodeOperand {
-    let indexed_adr: u8 = adr.wrapping_add(y);
-    OpcodeOperand::Address(indexed_adr.into())
-}
-
-pub fn izx(cpu_map: &dyn GetSet, adr: u8, x: u8) -> OpcodeOperand {
-    let indexed_adr: u8 = adr.wrapping_add(x);
-    let derefed_indexed_adr: u16 = (cpu_map.get(indexed_adr.into()) as u16) << 8
-        | cpu_map.get(indexed_adr.wrapping_add(1).into()) as u16;
-    OpcodeOperand::Address(derefed_indexed_adr)
-}
-
-pub fn izy(cpu_map: &dyn GetSet, adr: u8, y: u8) -> (OpcodeOperand, bool) {
-    let derefed_adr: u16 =
-        (cpu_map.get(adr.into()) as u16) << 8 | cpu_map.get(adr.wrapping_add(1).into()) as u16;
-    let indexed_derefed_adr: u16 = derefed_adr + y as u16;
+pub fn izy(addr: u8, y: u8, cpu_map: &dyn GetSet) -> (u16, bool) {
+    let derefed_addr = cpu_map.get_16(addr as u16);
+    let indexed_derefed_addr = derefed_addr + y as u16;
     (
-        OpcodeOperand::Address(indexed_derefed_adr),
-        indexed_derefed_adr > derefed_adr | 0x0FF,
+        indexed_derefed_addr,
+        indexed_derefed_addr > derefed_addr | 0x0FF,
     )
 }
 
-pub fn abs(adr: u16) -> OpcodeOperand {
-    OpcodeOperand::Address(adr)
+pub fn abs(addr: u16) -> u16 {
+    addr
 }
 
-pub fn abx(adr: u16, x: u8) -> (OpcodeOperand, bool) {
-    let indexed_adr: u16 = adr + x as u16;
-    (
-        OpcodeOperand::Address(indexed_adr),
-        indexed_adr > adr | 0xFF,
-    )
+pub fn abx(addr: u16, x: u8) -> (u16, bool) {
+    let indexed_addr = addr + x as u16;
+    (indexed_addr, indexed_addr > addr | 0xFF)
 }
 
-pub fn aby(adr: u16, y: u8) -> (OpcodeOperand, bool) {
-    let indexed_adr: u16 = adr + y as u16;
-    (
-        OpcodeOperand::Address(indexed_adr),
-        indexed_adr > adr | 0x0FF,
-    )
+pub fn aby(addr: u16, y: u8) -> (u16, bool) {
+    let indexed_addr = addr + y as u16;
+    (indexed_addr, indexed_addr > addr | 0x0FF)
 }
 
-pub fn ind(cpu_map: &dyn GetSet, adr: u16) -> OpcodeOperand {
-    let derefed_adr: u16 = (cpu_map.get(adr) as u16) << 8 | cpu_map.get(adr.wrapping_add(1)) as u16;
-    OpcodeOperand::Address(derefed_adr)
+pub fn ind(addr: u16, cpu_map: &dyn GetSet) -> u16 {
+    cpu_map.get_16(addr)
 }

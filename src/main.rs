@@ -39,7 +39,7 @@ fn main() {
     use crate::getset::GetSet;
     cpu.pc = 0xC000;
     let mut cyc = 0;
-    for _ in 0..10 {
+    for _ in 0..100 {
         let inst = cpu_map.get(cpu.pc);
         println!(
             "{:04X} {:2X}    A:{:02X} X:{:02X} Y:{:02X} P:{:02X} SP:{:02X} PPU:{:3},{:3} CYC:{}",

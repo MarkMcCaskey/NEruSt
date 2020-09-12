@@ -25,7 +25,7 @@ use crate::ppu_map::PpuMap;
 fn main() {
     let settings = Settings::new();
 
-    let mut ram = Memory::new(0x2000);
+    let mut cpu_ram = Memory::new(0x800);
     let mut ppu_memory = Memory::new(0x4000);
     let mut io = Memory::new(0x0020); // this will be... something... someday
     let mut cart = Cartridge::load_from_file(&settings.rom_file);
@@ -40,7 +40,7 @@ fn main() {
     for _ in 0..100 {
         {
             let mut cpu_map = CpuMap {
-                ram: &mut ram,
+                ram: &mut cpu_ram,
                 ppu: &mut ppu,
                 io: &mut io,
                 cart: &mut cart.cpu_view(),

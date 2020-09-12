@@ -10,7 +10,7 @@ pub struct CpuMap<'a, RAM: GetSet, PPU: GetSet, IO: GetSet> {
 impl<'a, RAM: GetSet, PPU: GetSet, IO: GetSet> GetSet for CpuMap<'a, RAM, PPU, IO> {
     fn get(&self, addr: u16) -> u8 {
         match addr {
-            0x0000..=0x1FFF => self.ram.get(addr),
+            0x0000..=0x1FFF => self.ram.get(addr & 0x7FF),
             0x2000..=0x3FFF => self.ppu.get(addr),
             0x4000..=0x4017 => self.io.get(addr),
             0x4018..=0x401F => unimplemented!(),

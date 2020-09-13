@@ -343,7 +343,7 @@ impl Cpu {
 
             0x40 => {
                 rti(self, cpu_map);
-                pc_inc_by = 0;
+                pc_inc_by = 2;
                 cyc_inc_by = 6;
             }
 
@@ -477,7 +477,7 @@ impl Cpu {
 
             0x60 => {
                 rts(self, cpu_map);
-                pc_inc_by = 0;
+                pc_inc_by = 3;
                 cyc_inc_by = 6;
             }
 
@@ -733,7 +733,7 @@ impl Cpu {
             0x9A => {
                 txs(self);
                 // TODO: review
-                pc_inc_by = 0;
+                pc_inc_by = 2;
                 cyc_inc_by = 2;
             }
 
@@ -921,7 +921,7 @@ impl Cpu {
                 let addr = izx(operand, self.x, cpu_map);
                 cmp(self, cpu_map.get(addr));
                 pc_inc_by = 2;
-                cyc_inc_by = 4;
+                cyc_inc_by = 6;
             }
 
             0xC4 => {
@@ -945,7 +945,7 @@ impl Cpu {
                 let addr = zp(operand);
                 dec(self, addr, cpu_map);
                 pc_inc_by = 2;
-                cyc_inc_by = 4;
+                cyc_inc_by = 3;
             }
 
             0xC8 => {
@@ -958,7 +958,7 @@ impl Cpu {
                 let operand = cpu_map.get(self.pc + 1);
                 cmp(self, operand);
                 pc_inc_by = 2;
-                cyc_inc_by = 4;
+                cyc_inc_by = 2;
             }
 
             0xCA => {
@@ -1003,7 +1003,7 @@ impl Cpu {
                 let (addr, add_cycle) = izy(operand, self.x, cpu_map);
                 cmp(self, cpu_map.get(addr));
                 pc_inc_by = 2;
-                cyc_inc_by = 4 + add_cycle as u8;
+                cyc_inc_by = 5 + add_cycle as u8;
             }
 
             0xD5 => {

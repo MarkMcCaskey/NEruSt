@@ -534,7 +534,7 @@ pub fn jsr(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
 pub fn rts(cpu: &mut Cpu, cpu_map: &dyn GetSet) {
     let idx = cpu.s;
     // TODO: docs imply address here is off by 1!!!
-    cpu.pc = cpu_map.get(idx as u16 + 1) as u16 | ((cpu_map.get(idx as u16 + 2) as u16) << 8);
+    cpu.pc = cpu_map.get(idx as u16 + 2) as u16 | ((cpu_map.get(idx as u16 + 1) as u16) << 8);
     cpu.s += 2;
 }
 

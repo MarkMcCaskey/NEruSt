@@ -141,7 +141,7 @@ impl Cpu {
                 let operand = cpu_map.get(self.pc + 1);
                 let result = bpl(self, operand);
                 pc_inc_by = 2;
-                cyc_inc_by = 2 + result as u8; // + page boundary crossed
+                cyc_inc_by = 2 + result; // + page boundary crossed
             }
 
             0x11 => {
@@ -284,7 +284,7 @@ impl Cpu {
                 let operand = cpu_map.get(self.pc + 1);
                 let result = bmi(self, operand);
                 pc_inc_by = 2;
-                cyc_inc_by = 2 + result as u8; // + page boundary crossed
+                cyc_inc_by = 2 + result; // + page boundary crossed
             }
 
             0x31 => {
@@ -418,7 +418,7 @@ impl Cpu {
                 let operand = cpu_map.get(self.pc + 1);
                 let result = bvc(self, operand);
                 pc_inc_by = 2;
-                cyc_inc_by = 2 + result as u8; // + page boundary crossed
+                cyc_inc_by = 2 + result; // + page boundary crossed
             }
 
             0x51 => {
@@ -552,7 +552,7 @@ impl Cpu {
                 let operand = cpu_map.get(self.pc + 1);
                 let result = bvs(self, operand);
                 pc_inc_by = 2;
-                cyc_inc_by = 2 + result as u8; // + page boundary crossed
+                cyc_inc_by = 2 + result; // + page boundary crossed
             }
 
             0x71 => {
@@ -638,7 +638,7 @@ impl Cpu {
                 let addr = zp(operand);
                 stx(self, addr, cpu_map);
                 pc_inc_by = 2;
-                cyc_inc_by = 4;
+                cyc_inc_by = 3;
             }
 
             0x88 => {
@@ -681,7 +681,7 @@ impl Cpu {
                 let operand = cpu_map.get(self.pc + 1);
                 let result = bcc(self, operand);
                 pc_inc_by = 2;
-                cyc_inc_by = 2 + result as u8; // + page boundary crossed
+                cyc_inc_by = 2 + result; // + page boundary crossed
             }
 
             0x91 => {
@@ -830,7 +830,7 @@ impl Cpu {
                 let operand = cpu_map.get(self.pc + 1);
                 let result = bcs(self, operand);
                 pc_inc_by = 2;
-                cyc_inc_by = 2 + result as u8; // + page boundary crossed
+                cyc_inc_by = 2 + result; // + page boundary crossed
             }
 
             0xB1 => {
@@ -995,7 +995,7 @@ impl Cpu {
                 let operand = cpu_map.get(self.pc + 1);
                 let result = bne(self, operand);
                 pc_inc_by = 2;
-                cyc_inc_by = 2 + result as u8; // + page boundary crossed
+                cyc_inc_by = 2 + result; // + page boundary crossed
             }
 
             0xD1 => {
@@ -1132,7 +1132,7 @@ impl Cpu {
                 let operand = cpu_map.get(self.pc + 1);
                 let result = beq(self, operand);
                 pc_inc_by = 2;
-                cyc_inc_by = 2 + result as u8; // + page boundary crossed
+                cyc_inc_by = 2 + result; // + page boundary crossed
             }
 
             0xF1 => {

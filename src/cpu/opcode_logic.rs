@@ -424,76 +424,84 @@ pub fn inc(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
 }
 
 // Branching
-pub fn bpl(cpu: &mut Cpu, val: u8) -> bool {
-    let negative = cpu.get_processor_status_flag(ProcessorStatusFlag::Negative);
-    if !negative {
+pub fn bpl(cpu: &mut Cpu, val: u8) -> u8 {
+    if !cpu.get_processor_status_flag(ProcessorStatusFlag::Negative) {
+        let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
     }
 
-    !negative
+    0
 }
 
-pub fn bmi(cpu: &mut Cpu, val: u8) -> bool {
-    let negative = cpu.get_processor_status_flag(ProcessorStatusFlag::Negative);
-    if negative {
+pub fn bmi(cpu: &mut Cpu, val: u8) -> u8 {
+    if cpu.get_processor_status_flag(ProcessorStatusFlag::Negative) {
+        let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
     }
 
-    negative
+    0
 }
 
-pub fn bvc(cpu: &mut Cpu, val: u8) -> bool {
-    let overflow = cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow);
-    if !overflow {
+pub fn bvc(cpu: &mut Cpu, val: u8) -> u8 {
+    if !cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow) {
+        let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
     }
 
-    !overflow
+    0
 }
 
-pub fn bvs(cpu: &mut Cpu, val: u8) -> bool {
-    let overflow = cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow);
-    if overflow {
+pub fn bvs(cpu: &mut Cpu, val: u8) -> u8 {
+    if cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow) {
+        let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
     }
 
-    overflow
+    0
 }
 
-pub fn bcc(cpu: &mut Cpu, val: u8) -> bool {
-    let carry = cpu.get_processor_status_flag(ProcessorStatusFlag::Carry);
-    if !carry {
+pub fn bcc(cpu: &mut Cpu, val: u8) -> u8 {
+    if !cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) {
+        let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
     }
 
-    !carry
+    0
 }
 
-pub fn bcs(cpu: &mut Cpu, val: u8) -> bool {
-    let carry = cpu.get_processor_status_flag(ProcessorStatusFlag::Carry);
-    if carry {
+pub fn bcs(cpu: &mut Cpu, val: u8) -> u8 {
+    if cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) {
+        let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
     }
 
-    carry
+    0
 }
 
-pub fn bne(cpu: &mut Cpu, val: u8) -> bool {
-    let zero = cpu.get_processor_status_flag(ProcessorStatusFlag::Zero);
-    if !zero {
+pub fn bne(cpu: &mut Cpu, val: u8) -> u8 {
+    if !cpu.get_processor_status_flag(ProcessorStatusFlag::Zero) {
+        let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
     }
 
-    !zero
+    0
 }
 
-pub fn beq(cpu: &mut Cpu, val: u8) -> bool {
-    let zero = cpu.get_processor_status_flag(ProcessorStatusFlag::Zero);
-    if zero {
+pub fn beq(cpu: &mut Cpu, val: u8) -> u8 {
+    if cpu.get_processor_status_flag(ProcessorStatusFlag::Zero) {
+        let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
     }
 
-    zero
+    0
 }
 
 // TODO: this function is probably wrong

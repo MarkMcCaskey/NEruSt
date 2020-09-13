@@ -35,9 +35,9 @@ fn main() {
     let mut ppu = Ppu::new();
 
     cpu.pc = 0xC000;
-    let mut cpu_cyc = 0;
+    let mut cpu_cyc = 7;
     let mut ppu_cyc = 0;
-    for _ in 0..100 {
+    for _ in 0..62 {
         {
             let mut cpu_map = CpuMap {
                 ram: &mut cpu_ram,

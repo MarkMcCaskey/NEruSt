@@ -37,7 +37,7 @@ fn main() {
     cpu.pc = 0xC000;
     let mut cpu_cyc = 7;
     let mut ppu_cyc = 0;
-    for _ in 0..62 {
+    for it in 1..300 {
         {
             let mut cpu_map = CpuMap {
                 ram: &mut cpu_ram,
@@ -47,8 +47,8 @@ fn main() {
             };
             let inst = cpu_map.get(cpu.pc);
             println!(
-            "{:04X} {:2X}    A:{:02X} X:{:02X} Y:{:02X} P:{:02X} SP:{:02X} PPU:{:3},{:3} CYC:{}",
-            cpu.pc, inst, cpu.acc, cpu.x, cpu.y, cpu.p, cpu.s, 0, 0, cpu_cyc,
+            "{:05}: {:04X} {:2X}    A:{:02X} X:{:02X} Y:{:02X} P:{:02X} SP:{:02X} PPU:{:3},{:3} CYC:{}",
+            it, cpu.pc, inst, cpu.acc, cpu.x, cpu.y, cpu.p, cpu.s, 0, 0, cpu_cyc,
             );
             // run an instruction
             cpu_cyc += cpu.run_instruction(&mut cpu_map) as usize;

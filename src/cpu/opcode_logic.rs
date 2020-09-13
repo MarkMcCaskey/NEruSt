@@ -52,16 +52,19 @@ pub fn sty(cpu: &Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
 pub fn eor(cpu: &mut Cpu, val: u8) {
     cpu.acc ^= val;
     cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.acc == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, (cpu.acc as i8) < 0);
 }
 
 pub fn and(cpu: &mut Cpu, val: u8) {
     cpu.acc &= val;
     cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.acc == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, (cpu.acc as i8) < 0);
 }
 
 pub fn ora(cpu: &mut Cpu, val: u8) {
     cpu.acc |= val;
     cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.acc == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, (cpu.acc as i8) < 0);
 }
 
 //////////////////////////////////////////////////

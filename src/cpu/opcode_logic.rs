@@ -162,16 +162,17 @@ pub fn pha(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
     cpu.s -= 1;
 }
 
-// Note: inconsistent documentation.  Some say that B flag is not affected by this, others say it's the only way
+// TODO: possibly wrong
 pub fn plp(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
     cpu.s += 1;
     let idx = cpu.s;
-    cpu.p = cpu_map.get(idx as u16);
+    cpu.p = cpu_map.get(idx as u16) & 0b11001111 | 0b00100000;
 }
 
+// TODO: possibly wrong
 pub fn php(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
     let idx = cpu.s;
-    cpu_map.set(idx as u16, cpu.p);
+    cpu_map.set(idx as u16, cpu.p | 0b00110000);
     cpu.s -= 1;
 }
 

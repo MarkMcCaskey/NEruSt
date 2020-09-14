@@ -50,7 +50,7 @@ impl Cpu {
 
     #[inline(always)]
     pub fn set_flag(&mut self, flag: ProcessorStatusFlag) {
-        self.p |= 1 << flag as u8;
+        self.p |= 1 << (flag as u8);
     }
 
     #[inline(always)]
@@ -644,7 +644,7 @@ impl Cpu {
             0x88 => {
                 dey(self);
                 pc_inc_by = 1;
-                cyc_inc_by = 4;
+                cyc_inc_by = 2;
             }
 
             0x8A => {
@@ -733,7 +733,7 @@ impl Cpu {
             0x9A => {
                 txs(self);
                 // TODO: review
-                pc_inc_by = 2;
+                pc_inc_by = 1;
                 cyc_inc_by = 2;
             }
 
@@ -810,10 +810,18 @@ impl Cpu {
                 cyc_inc_by = 2;
             }
 
-            0xAD => {
+            0xAC => {
                 let operand = cpu_map.get_16(self.pc + 1);
                 let addr = abs(operand);
                 ldy(self, cpu_map.get(addr));
+                pc_inc_by = 3;
+                cyc_inc_by = 4;
+            }
+
+            0xAD => {
+                let operand = cpu_map.get_16(self.pc + 1);
+                let addr = abs(operand);
+                lda(self, cpu_map.get(addr));
                 pc_inc_by = 3;
                 cyc_inc_by = 4;
             }
@@ -913,7 +921,7 @@ impl Cpu {
                 let operand = cpu_map.get(self.pc + 1);
                 cpy(self, operand);
                 pc_inc_by = 2;
-                cyc_inc_by = 4;
+                cyc_inc_by = 2;
             }
 
             0xC1 => {
@@ -929,7 +937,7 @@ impl Cpu {
                 let addr = zp(operand);
                 cpy(self, cpu_map.get(addr));
                 pc_inc_by = 2;
-                cyc_inc_by = 4;
+                cyc_inc_by = 3;
             }
 
             0xC5 => {
@@ -951,7 +959,7 @@ impl Cpu {
             0xC8 => {
                 iny(self);
                 pc_inc_by = 1;
-                cyc_inc_by = 4;
+                cyc_inc_by = 2;
             }
 
             0xC9 => {
@@ -964,7 +972,7 @@ impl Cpu {
             0xCA => {
                 dex(self);
                 pc_inc_by = 1;
-                cyc_inc_by = 4;
+                cyc_inc_by = 2;
             }
 
             0xCC => {
@@ -1056,7 +1064,7 @@ impl Cpu {
                 let operand = cpu_map.get(self.pc + 1);
                 cpx(self, operand);
                 pc_inc_by = 2;
-                cyc_inc_by = 4;
+                cyc_inc_by = 2;
             }
 
             0xE1 => {
@@ -1072,7 +1080,7 @@ impl Cpu {
                 let addr = zp(operand);
                 cpx(self, cpu_map.get(addr));
                 pc_inc_by = 2;
-                cyc_inc_by = 4;
+                cyc_inc_by = 3;
             }
 
             0xE5 => {
@@ -1094,7 +1102,7 @@ impl Cpu {
             0xE8 => {
                 inx(self);
                 pc_inc_by = 1;
-                cyc_inc_by = 4;
+                cyc_inc_by = 2;
             }
 
             0xE9 => {

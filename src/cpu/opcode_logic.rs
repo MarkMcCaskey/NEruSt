@@ -103,38 +103,30 @@ pub fn sei(cpu: &mut Cpu) {
 ///// Transfer opcodes
 pub fn tax(cpu: &mut Cpu) {
     cpu.x = cpu.acc;
-
-    let is_zero = cpu.x == 0;
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.acc == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, cpu.acc & 0x80 == 0x80);
 }
 
 pub fn txa(cpu: &mut Cpu) {
     cpu.acc = cpu.x;
-
-    let is_zero = cpu.x == 0;
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.x == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, cpu.x & 0x80 == 0x80);
 }
 
 pub fn tay(cpu: &mut Cpu) {
     cpu.y = cpu.acc;
-
-    let is_zero = cpu.y == 0;
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.acc == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, cpu.acc & 0x80 == 0x80);
 }
 
 pub fn tya(cpu: &mut Cpu) {
     cpu.acc = cpu.y;
-
-    let is_zero = cpu.y == 0;
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
-    // TODO: set Negative flag for these instructions
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.y == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, cpu.y & 0x80 == 0x80);
 }
 
-// TODO: verify the indexing of tsx and txs is correct
-// is it immediate? if so why do the docs call x an index?
 pub fn tsx(cpu: &mut Cpu) {
     cpu.x = cpu.s;
-
     let is_zero = cpu.s == 0;
     let is_neg = (cpu.s as i8) < 0;
     cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
@@ -147,8 +139,8 @@ pub fn txs(cpu: &mut Cpu) {
 
 pub fn pla(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
     cpu.s += 1;
-    let idx = cpu.s;
-    cpu.acc = cpu_map.get(idx as u16);
+    let idx = cpu.s as u16 + 0x100;
+    cpu.acc = cpu_map.get(idx);
 
     let is_zero = cpu.acc == 0;
     let is_neg = (cpu.acc as i8) < 0;
@@ -157,21 +149,21 @@ pub fn pla(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
 }
 
 pub fn pha(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
-    let idx = cpu.s;
-    cpu_map.set(idx as u16, cpu.acc);
+    let idx = cpu.s as u16 + 0x100;
+    cpu_map.set(idx, cpu.acc);
     cpu.s -= 1;
 }
 
 // TODO: possibly wrong
 pub fn plp(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
     cpu.s += 1;
-    let idx = cpu.s;
-    cpu.p = cpu_map.get(idx as u16) & 0b11001111 | 0b00100000;
+    let idx = cpu.s as u16 + 0x100;
+    cpu.p = cpu_map.get(idx) & 0b11001111 | 0b00100000;
 }
 
 // TODO: possibly wrong
 pub fn php(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
-    let idx = cpu.s;
+    let idx = cpu.s as u16 + 0x100;
     cpu_map.set(idx as u16, cpu.p | 0b00110000);
     cpu.s -= 1;
 }
@@ -181,30 +173,26 @@ pub fn php(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
 ///// Increment opcodes
 pub fn dex(cpu: &mut Cpu) {
     cpu.x = cpu.x.wrapping_sub(1);
-
-    let is_zero = cpu.x == 0;
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.x == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, cpu.x & 0x80 == 0x80);
 }
 
 pub fn inx(cpu: &mut Cpu) {
     cpu.x = cpu.x.wrapping_add(1);
-
-    let is_zero = cpu.x == 0;
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.x == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, cpu.x & 0x80 == 0x80);
 }
 
 pub fn dey(cpu: &mut Cpu) {
     cpu.y = cpu.y.wrapping_sub(1);
-
-    let is_zero = cpu.y == 0;
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.y == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, cpu.y & 0x80 == 0x80);
 }
 
 pub fn iny(cpu: &mut Cpu) {
     cpu.y = cpu.y.wrapping_add(1);
-
-    let is_zero = cpu.y == 0;
-    cpu.set_flag_value(ProcessorStatusFlag::Zero, is_zero);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, cpu.y == 0);
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, cpu.y & 0x80 == 0x80);
 }
 
 //////////////////////////////////////////////////
@@ -212,7 +200,10 @@ pub fn iny(cpu: &mut Cpu) {
 ///// Math opcodes
 pub fn adc(cpu: &mut Cpu, val: u8) {
     let old_acc = cpu.acc;
-    cpu.acc = cpu.acc.wrapping_add(val);
+    cpu.acc = cpu
+        .acc
+        .wrapping_add(val)
+        .wrapping_add(cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8);
 
     let negative_flag = cpu.acc & 0x80 == 0x80;
     let overflow_flag =
@@ -226,6 +217,9 @@ pub fn adc(cpu: &mut Cpu, val: u8) {
 }
 
 pub fn sbc(cpu: &mut Cpu, val: u8) {
+    adc(cpu, !val);
+    /*
+
     let old_acc: u8 = cpu.acc;
     cpu.acc = cpu.acc.wrapping_sub(val);
 
@@ -237,7 +231,7 @@ pub fn sbc(cpu: &mut Cpu, val: u8) {
     cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
     cpu.set_flag_value(ProcessorStatusFlag::Overflow, overflow_flag);
     cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
-    cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
+    cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);*/
 }
 
 //////////////////////////////////////////////////
@@ -379,24 +373,13 @@ pub fn asl(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
 
 /// Function that implements the flag setting logic of `cmp`, `cpx`, and `cpy`
 fn common_cmp(cpu: &mut Cpu, first: u8, second: u8) {
-    use std::cmp::Ordering;
-    match first.cmp(&second) {
-        Ordering::Equal => {
-            cpu.set_flag_value(ProcessorStatusFlag::Negative, false);
-            cpu.set_flag_value(ProcessorStatusFlag::Zero, true);
-            cpu.set_flag_value(ProcessorStatusFlag::Carry, true);
-        }
-        Ordering::Greater => {
-            cpu.set_flag_value(ProcessorStatusFlag::Negative, true);
-            cpu.set_flag_value(ProcessorStatusFlag::Zero, false);
-            cpu.set_flag_value(ProcessorStatusFlag::Carry, false);
-        }
-        Ordering::Less => {
-            cpu.set_flag_value(ProcessorStatusFlag::Negative, false);
-            cpu.set_flag_value(ProcessorStatusFlag::Zero, false);
-            cpu.set_flag_value(ProcessorStatusFlag::Carry, true);
-        }
-    }
+    let negative_flag = first.wrapping_sub(second) & 0x80 == 0x80;
+    let carry_flag = first >= second;
+    let zero_flag = first == second;
+
+    cpu.set_flag_value(ProcessorStatusFlag::Negative, negative_flag);
+    cpu.set_flag_value(ProcessorStatusFlag::Carry, carry_flag);
+    cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
 }
 
 pub fn cmp(cpu: &mut Cpu, val: u8) {

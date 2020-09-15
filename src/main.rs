@@ -37,7 +37,7 @@ fn main() {
     cpu.pc = 0xC000;
     let mut cpu_cyc = 7;
     let mut ppu_cyc = 0;
-    for it in 1..=885 {
+    for it in 1..=3000 {
         {
             let mut cpu_map = CpuMap {
                 ram: &mut cpu_ram,

@@ -275,7 +275,7 @@ pub fn ror_imp(cpu: &mut Cpu) {
     let (old_val, new_val) = {
         let old_val = cpu.acc;
         cpu.acc >>= 1;
-        cpu.acc |= cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8;
+        cpu.acc |= (cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) as u8) << 7;
         (old_val, cpu.acc)
     };
 
@@ -382,6 +382,9 @@ fn common_cmp(cpu: &mut Cpu, first: u8, second: u8) {
     cpu.set_flag_value(ProcessorStatusFlag::Zero, zero_flag);
 }
 
+/*0110 0101
+X--- --XX*/
+
 pub fn cmp(cpu: &mut Cpu, val: u8) {
     common_cmp(cpu, cpu.acc, val);
 }
@@ -415,7 +418,7 @@ pub fn bpl(cpu: &mut Cpu, val: u8) -> u8 {
     if !cpu.get_processor_status_flag(ProcessorStatusFlag::Negative) {
         let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
-        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
+        return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
     0
@@ -425,7 +428,7 @@ pub fn bmi(cpu: &mut Cpu, val: u8) -> u8 {
     if cpu.get_processor_status_flag(ProcessorStatusFlag::Negative) {
         let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
-        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
+        return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
     0
@@ -435,7 +438,7 @@ pub fn bvc(cpu: &mut Cpu, val: u8) -> u8 {
     if !cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow) {
         let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
-        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
+        return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
     0
@@ -445,7 +448,7 @@ pub fn bvs(cpu: &mut Cpu, val: u8) -> u8 {
     if cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow) {
         let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
-        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
+        return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
     0
@@ -455,7 +458,7 @@ pub fn bcc(cpu: &mut Cpu, val: u8) -> u8 {
     if !cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) {
         let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
-        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
+        return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
     0
@@ -465,7 +468,7 @@ pub fn bcs(cpu: &mut Cpu, val: u8) -> u8 {
     if cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) {
         let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
-        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
+        return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
     0
@@ -475,7 +478,7 @@ pub fn bne(cpu: &mut Cpu, val: u8) -> u8 {
     if !cpu.get_processor_status_flag(ProcessorStatusFlag::Zero) {
         let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
-        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
+        return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
     0
@@ -485,7 +488,7 @@ pub fn beq(cpu: &mut Cpu, val: u8) -> u8 {
     if cpu.get_processor_status_flag(ProcessorStatusFlag::Zero) {
         let old_pc = cpu.pc;
         cpu.pc = (cpu.pc as i16 + val as i16) as u16;
-        return 1 + (cpu.pc > old_pc | 0x0FF) as u8;
+        return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
     0
@@ -493,6 +496,7 @@ pub fn beq(cpu: &mut Cpu, val: u8) -> u8 {
 
 // TODO: this function is probably wrong
 pub fn brk(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
+    unimplemented!();
     cpu.set_flag_value(ProcessorStatusFlag::Interrupt, true);
     cpu.set_flag_value(ProcessorStatusFlag::Break, true);
     let idx = cpu.s;
@@ -504,24 +508,24 @@ pub fn brk(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
 }
 
 pub fn rti(cpu: &mut Cpu, cpu_map: &dyn GetSet) {
-    let idx = cpu.s;
-    cpu.p = cpu_map.get(idx as u16 + 1);
-    cpu.pc = cpu_map.get(idx as u16 + 2) as u16 | ((cpu_map.get(idx as u16 + 3) as u16) << 8);
+    let idx = cpu.s as u16 | 0x100;
+    cpu.p = cpu_map.get(idx + 1) & 0b11001111 | 0b00100000;
+    cpu.pc = cpu_map.get_16(idx + 2);
     cpu.s += 3;
 }
 
 pub fn jsr(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
-    let idx = cpu.s;
-    cpu_map.set(idx as u16, cpu.pc as u8);
-    cpu_map.set(idx as u16 - 1, (cpu.pc >> 8) as u8);
+    let idx = cpu.s as u16 | 0x100;
+    let push = cpu.pc.wrapping_add(3).wrapping_sub(1);
+    cpu_map.set(idx, (push >> 8) as u8);
+    cpu_map.set(idx - 1, push as u8);
     cpu.s -= 2;
     cpu.pc = addr
 }
 
 pub fn rts(cpu: &mut Cpu, cpu_map: &dyn GetSet) {
-    let idx = cpu.s;
-    // TODO: docs imply address here is off by 1!!!
-    cpu.pc = cpu_map.get(idx as u16 + 2) as u16 | ((cpu_map.get(idx as u16 + 1) as u16) << 8);
+    let idx = cpu.s as u16 | 0x100;
+    cpu.pc = cpu_map.get_16(idx + 1).wrapping_add(1);
     cpu.s += 2;
 }
 

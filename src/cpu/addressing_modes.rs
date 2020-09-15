@@ -48,5 +48,7 @@ pub fn aby(addr: u16, y: u8) -> (u16, bool) {
 }
 
 pub fn ind(addr: u16, cpu_map: &dyn GetSet) -> u16 {
-    cpu_map.get_16(addr)
+    let lo = cpu_map.get(addr);
+    let hi = cpu_map.get(addr & 0xFF00 | (addr as u8).wrapping_add(1) as u16);
+    lo as u16 | ((hi as u16) << 8)
 }

@@ -1201,17 +1201,29 @@ impl Cpu {
                 pc_inc_by = 0;
                 cyc_inc_by = 4;
             }
-            0x1A | 0x3A | 0x5A | 0x7A | 0x80 | 0x82 | 0x89 | 0xC2 | 0xDA | 0xE2 | 0xEA | 0xFA => {
+            0x80 => {
+                pc_inc_by = 2;
+                cyc_inc_by = 2;
+            }
+            0x1A | 0x3A | 0x5A | 0x7A | 0x82 | 0x89 | 0xC2 | 0xDA | 0xE2 | 0xEA | 0xFA => {
                 pc_inc_by = 1;
                 cyc_inc_by = 2;
             }
             0x04 | 0x44 | 0x64 => {
-                pc_inc_by = 1;
+                pc_inc_by = 2;
                 cyc_inc_by = 3;
             }
-            0x0C | 0x14 | 0x1C | 0x34 | 0x3C | 0x54 | 0x5C | 0x74 | 0x7C | 0xD4 | 0xDC | 0xF4 => {
-                pc_inc_by = 1;
+            0x0C => {
+                pc_inc_by = 3;
                 cyc_inc_by = 4;
+            }
+            0x14 | 0x34 | 0x54 | 0x74 | 0xD4 | 0xF4 => {
+                pc_inc_by = 2;
+                cyc_inc_by = 4;
+            }
+            0x1C | 0x3C | 0x5C | 0x7C | 0xDC | 0xFC => {
+                pc_inc_by = 3;
+                cyc_inc_by = 6;
             }
 
             // Shouldn't ever happen.

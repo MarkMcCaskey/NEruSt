@@ -219,10 +219,8 @@ pub fn adc(cpu: &mut Cpu, val: u8) {
 pub fn sbc(cpu: &mut Cpu, val: u8) {
     adc(cpu, !val);
     /*
-
     let old_acc: u8 = cpu.acc;
     cpu.acc = cpu.acc.wrapping_sub(val);
-
     let negative_flag = cpu.acc & 0x80 == 0x80;
     let overflow_flag =
         (!old_acc & !val & cpu.acc & 0x80) == 0x80 || (old_acc & val & !cpu.acc & 0x80) == 0x80;
@@ -477,7 +475,7 @@ pub fn bcs(cpu: &mut Cpu, val: u8) -> u8 {
 pub fn bne(cpu: &mut Cpu, val: u8) -> u8 {
     if !cpu.get_processor_status_flag(ProcessorStatusFlag::Zero) {
         let old_pc = cpu.pc;
-        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        cpu.pc = (cpu.pc as i16 + val as i8 as i16) as u16;
         return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 

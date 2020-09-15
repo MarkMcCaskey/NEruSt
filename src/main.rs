@@ -7,6 +7,7 @@ mod cpu;
 mod cpu_map;
 mod getset;
 mod header;
+mod io;
 mod memory;
 mod ppu;
 mod ppu_map;
@@ -27,12 +28,15 @@ fn main() {
 
     let mut cpu_ram = Memory::new(0x800);
     let mut ppu_memory = Memory::new(0x4000);
-    let mut io = Memory::new(0x0020); // this will be... something... someday
+    let mut io_memory = Memory::new(0x0020); // this will be... something... someday
     let mut cart = Cartridge::load_from_file(&settings.rom_file);
 
     // cpu
     let mut cpu = Cpu::new();
     let mut ppu = Ppu::new();
+
+    /*use crate::io::{Input, Output};
+    let mut io = io::native::NativeRenderer::new(400, 600).unwrap();*/
 
     cpu.pc = 0xC000;
     let mut cpu_cyc = 7;
@@ -42,7 +46,7 @@ fn main() {
             let mut cpu_map = CpuMap {
                 ram: &mut cpu_ram,
                 ppu: &mut ppu,
-                io: &mut io,
+                io: &mut io_memory,
                 cart: &mut cart.cpu_view(),
             };
             let inst = cpu_map.get(cpu.pc);
@@ -59,5 +63,9 @@ fn main() {
             cart: &mut cart.ppu_view(),
         };
         ppu_cyc += ppu.run_instruction(&mut ppu_memory, &mut ppu_map) as usize;
+
+        /*while let Some(ie) = io.get_next_input() {
+            dbg!(ie);
+        }*/
     }
 }

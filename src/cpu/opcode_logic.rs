@@ -506,24 +506,25 @@ pub fn brk(cpu: &mut Cpu, cpu_map: &mut dyn GetSet) {
 }
 
 pub fn rti(cpu: &mut Cpu, cpu_map: &dyn GetSet) {
-    let idx = cpu.s as u16 | 0x100;
-    cpu.p = cpu_map.get(idx + 1) & 0b11001111 | 0b00100000;
-    cpu.pc = cpu_map.get_16(idx + 2);
+    cpu.p = cpu_map.get(cpu.s.wrapping_add(1) as u16 | 0x100) & 0xCF | 0x20;
+    let lo = cpu_map.get(cpu.s.wrapping_add(2) as u16 | 0x100);
+    let hi = cpu_map.get(cpu.s.wrapping_add(3) as u16 | 0x100);
+    cpu.pc = lo as u16 | ((hi as u16) << 8);
     cpu.s += 3;
 }
 
 pub fn jsr(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
-    let idx = cpu.s as u16 | 0x100;
     let push = cpu.pc.wrapping_add(3).wrapping_sub(1);
-    cpu_map.set(idx, (push >> 8) as u8);
-    cpu_map.set(idx - 1, push as u8);
+    cpu_map.set(cpu.s as u16 | 0x100, (push >> 8) as u8);
+    cpu_map.set(cpu.s.wrapping_sub(1) as u16 | 0x100, push as u8);
     cpu.s -= 2;
     cpu.pc = addr
 }
 
 pub fn rts(cpu: &mut Cpu, cpu_map: &dyn GetSet) {
-    let idx = cpu.s as u16 | 0x100;
-    cpu.pc = cpu_map.get_16(idx + 1).wrapping_add(1);
+    let lo = cpu_map.get(cpu.s.wrapping_add(1) as u16 | 0x100);
+    let hi = cpu_map.get(cpu.s.wrapping_add(2) as u16 | 0x100);
+    cpu.pc = (lo as u16 | ((hi as u16) << 8)).wrapping_add(1);
     cpu.s += 2;
 }
 

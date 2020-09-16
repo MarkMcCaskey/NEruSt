@@ -1222,8 +1222,10 @@ impl Cpu {
                 cyc_inc_by = 4;
             }
             0x1C | 0x3C | 0x5C | 0x7C | 0xDC | 0xFC => {
+                let operand = cpu_map.get_16(self.pc + 1);
+                let (_, add_cycle) = abx(operand, self.x);
                 pc_inc_by = 3;
-                cyc_inc_by = 6;
+                cyc_inc_by = 4 + add_cycle as u8;
             }
 
             // Shouldn't ever happen.

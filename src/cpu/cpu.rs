@@ -14,6 +14,8 @@ pub struct Cpu {
     /// Whether the CPU is running
     // TODO: when set data bus returns $FF
     pub halt: bool,
+    // interrupt
+    pub reset: bool,
 }
 
 #[repr(u8)]
@@ -38,9 +40,14 @@ impl Cpu {
             y: 0,
             p: 0x24,
             pc: 0,
-            s: 0xFD,
+            s: 0x00,
             halt: false,
+            reset: true,
         }
+    }
+
+    pub fn reset(&mut self) {
+        self.reset = true;
     }
 
     #[inline(always)]
@@ -68,6 +75,17 @@ impl Cpu {
 
     pub fn run_instruction<CPU_MAP: GetSet>(&mut self, cpu_map: &mut CPU_MAP) -> u8 {
         let op = cpu_map.get(self.pc);
+
+        // NMI interrupts happen after first read
+        if (self.reset) {
+            self.reset = false;
+            self.set_flag(ProcessorStatusFlag::Interrupt);
+            let lo = cpu_map.get(0xFFFC);
+            let hi = cpu_map.get(0xFFFD);
+            self.pc = lo as u16 | ((hi as u16) << 8);
+            self.s = self.s.wrapping_sub(3);
+            return 7;
+        }
 
         let pc_inc_by;
         let cyc_inc_by;

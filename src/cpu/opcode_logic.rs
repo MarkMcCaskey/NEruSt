@@ -415,7 +415,7 @@ pub fn inc(cpu: &mut Cpu, addr: u16, cpu_map: &mut dyn GetSet) {
 pub fn bpl(cpu: &mut Cpu, val: u8) -> u8 {
     if !cpu.get_processor_status_flag(ProcessorStatusFlag::Negative) {
         let old_pc = cpu.pc;
-        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        cpu.pc = (cpu.pc as i16 + val as i8 as i16) as u16;
         return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
@@ -425,7 +425,7 @@ pub fn bpl(cpu: &mut Cpu, val: u8) -> u8 {
 pub fn bmi(cpu: &mut Cpu, val: u8) -> u8 {
     if cpu.get_processor_status_flag(ProcessorStatusFlag::Negative) {
         let old_pc = cpu.pc;
-        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        cpu.pc = (cpu.pc as i16 + val as i8 as i16) as u16;
         return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
@@ -435,7 +435,7 @@ pub fn bmi(cpu: &mut Cpu, val: u8) -> u8 {
 pub fn bvc(cpu: &mut Cpu, val: u8) -> u8 {
     if !cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow) {
         let old_pc = cpu.pc;
-        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        cpu.pc = (cpu.pc as i16 + val as i8 as i16) as u16;
         return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
@@ -445,7 +445,7 @@ pub fn bvc(cpu: &mut Cpu, val: u8) -> u8 {
 pub fn bvs(cpu: &mut Cpu, val: u8) -> u8 {
     if cpu.get_processor_status_flag(ProcessorStatusFlag::Overflow) {
         let old_pc = cpu.pc;
-        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        cpu.pc = (cpu.pc as i16 + val as i8 as i16) as u16;
         return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
@@ -455,7 +455,7 @@ pub fn bvs(cpu: &mut Cpu, val: u8) -> u8 {
 pub fn bcc(cpu: &mut Cpu, val: u8) -> u8 {
     if !cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) {
         let old_pc = cpu.pc;
-        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        cpu.pc = (cpu.pc as i16 + val as i8 as i16) as u16;
         return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 
@@ -465,7 +465,7 @@ pub fn bcc(cpu: &mut Cpu, val: u8) -> u8 {
 pub fn bcs(cpu: &mut Cpu, val: u8) -> u8 {
     if cpu.get_processor_status_flag(ProcessorStatusFlag::Carry) {
         let old_pc = cpu.pc;
-        cpu.pc = (cpu.pc as i16 + val as i16) as u16;
+        cpu.pc = (cpu.pc as i16 + val as i8 as i16) as u16;
         return 1 + (0/*cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
     }
 

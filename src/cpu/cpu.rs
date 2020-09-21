@@ -16,6 +16,7 @@ pub struct Cpu {
     pub halt: bool,
     // interrupt
     pub reset: bool,
+    pub nmi: bool,
 }
 
 #[repr(u8)]
@@ -43,11 +44,16 @@ impl Cpu {
             s: 0x00,
             halt: false,
             reset: true,
+            nmi: false,
         }
     }
 
     pub fn reset(&mut self) {
         self.reset = true;
+    }
+
+    pub fn nmi(&mut self) {
+        self.nmi = true;
     }
 
     #[inline(always)]
@@ -76,16 +82,53 @@ impl Cpu {
     pub fn run_instruction<CPU_MAP: GetSet>(&mut self, cpu_map: &mut CPU_MAP) -> u8 {
         let op = cpu_map.get(self.pc);
 
-        // NMI interrupts happen after first read
-        if (self.reset) {
+        // reset interrupt
+        if self.reset {
             self.reset = false;
-            self.set_flag(ProcessorStatusFlag::Interrupt);
+
+            // reset supresses stack writes, so just offset by 3
+            self.s = self.s.wrapping_sub(3);
+
+            // set PC to address at $FFFC (reset vector)
             let lo = cpu_map.get(0xFFFC);
             let hi = cpu_map.get(0xFFFD);
             self.pc = lo as u16 | ((hi as u16) << 8);
-            self.s = self.s.wrapping_sub(3);
+
+            // set interrupt flag
+            self.set_flag(ProcessorStatusFlag::Interrupt);
+
+            // interrupts take 7 cycles
             return 7;
         }
+
+        // NMI interrupt
+        if self.nmi {
+            self.nmi = false;
+
+            // push flags and PC to stack
+            self.s = self.s.wrapping_sub(3);
+            cpu_map.set(self.s.wrapping_add(1) as u16 | 0x100, self.p); // this is wrong
+            cpu_map.set(self.s.wrapping_add(2) as u16 | 0x100, self.pc as u8);
+            cpu_map.set(self.s.wrapping_add(3) as u16 | 0x100, (self.pc >> 8) as u8);
+
+            // set PC to address at $FFFA (NMI vector)
+            let lo = cpu_map.get(0xFFFA);
+            let hi = cpu_map.get(0xFFFB);
+            self.pc = lo as u16 | ((hi as u16) << 8);
+
+            // set interrupt flag
+            self.set_flag(ProcessorStatusFlag::Interrupt);
+
+            // interrupts take 7 cycles
+            return 7;
+        }
+
+        // BRK eventually
+
+        // little endian get16 for convenience
+        let get16 = |cpu_map: &mut CPU_MAP, addr| {
+            ((cpu_map.get(addr + 1) as u16) << 8) | cpu_map.get(addr) as u16
+        };
 
         let pc_inc_by;
         let cyc_inc_by;
@@ -140,7 +183,7 @@ impl Cpu {
             }
 
             0x0D => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 ora(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -148,7 +191,7 @@ impl Cpu {
             }
 
             0x0E => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 asl(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -193,7 +236,7 @@ impl Cpu {
             }
 
             0x19 => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = aby(operand, self.y);
                 ora(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -201,7 +244,7 @@ impl Cpu {
             }
 
             0x1D => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = abx(operand, self.x);
                 ora(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -209,7 +252,7 @@ impl Cpu {
             }
 
             0x1E => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, _) = abx(operand, self.x);
                 asl(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -217,7 +260,7 @@ impl Cpu {
             }
 
             0x20 => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 jsr(self, addr, cpu_map);
                 pc_inc_by = 0;
@@ -276,14 +319,14 @@ impl Cpu {
             }
 
             0x2C => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 bit(self, addr, cpu_map);
                 pc_inc_by = 3;
                 cyc_inc_by = 4;
             }
             0x2D => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 and(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -291,7 +334,7 @@ impl Cpu {
             }
 
             0x2E => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 rol(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -336,7 +379,7 @@ impl Cpu {
             }
 
             0x39 => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = aby(operand, self.y);
                 and(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -344,7 +387,7 @@ impl Cpu {
             }
 
             0x3D => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = abx(operand, self.x);
                 and(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -352,7 +395,7 @@ impl Cpu {
             }
 
             0x3E => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, _) = abx(operand, self.x);
                 rol(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -409,7 +452,7 @@ impl Cpu {
             }
 
             0x4C => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 jmp(self, addr);
                 pc_inc_by = 0;
@@ -417,7 +460,7 @@ impl Cpu {
             }
 
             0x4D => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 eor(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -425,7 +468,7 @@ impl Cpu {
             }
 
             0x4E => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 lsr(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -470,7 +513,7 @@ impl Cpu {
             }
 
             0x59 => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = aby(operand, self.y);
                 eor(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -478,7 +521,7 @@ impl Cpu {
             }
 
             0x5D => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = abx(operand, self.x);
                 eor(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -486,7 +529,7 @@ impl Cpu {
             }
 
             0x5E => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, _) = abx(operand, self.x);
                 lsr(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -543,7 +586,7 @@ impl Cpu {
             }
 
             0x6C => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = ind(operand, cpu_map);
                 jmp(self, addr);
                 pc_inc_by = 0;
@@ -551,7 +594,7 @@ impl Cpu {
             }
 
             0x6D => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 adc(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -559,7 +602,7 @@ impl Cpu {
             }
 
             0x6E => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 ror(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -604,7 +647,7 @@ impl Cpu {
             }
 
             0x79 => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = aby(operand, self.y);
                 adc(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -612,7 +655,7 @@ impl Cpu {
             }
 
             0x7D => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = abx(operand, self.x);
                 adc(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -620,7 +663,7 @@ impl Cpu {
             }
 
             0x7E => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, _) = abx(operand, self.x);
                 ror(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -672,7 +715,7 @@ impl Cpu {
             }
 
             0x8C => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 sty(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -680,7 +723,7 @@ impl Cpu {
             }
 
             0x8D => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 sta(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -688,7 +731,7 @@ impl Cpu {
             }
 
             0x8E => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 stx(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -741,7 +784,7 @@ impl Cpu {
             }
 
             0x99 => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, _) = aby(operand, self.y);
                 sta(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -756,7 +799,7 @@ impl Cpu {
             }
 
             0x9D => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, _) = abx(operand, self.x);
                 sta(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -829,7 +872,7 @@ impl Cpu {
             }
 
             0xAC => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 ldy(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -837,7 +880,7 @@ impl Cpu {
             }
 
             0xAD => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 lda(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -845,7 +888,7 @@ impl Cpu {
             }
 
             0xAE => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 ldx(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -898,7 +941,7 @@ impl Cpu {
             }
 
             0xB9 => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = aby(operand, self.y);
                 lda(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -912,7 +955,7 @@ impl Cpu {
             }
 
             0xBC => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = abx(operand, self.x);
                 ldy(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -920,7 +963,7 @@ impl Cpu {
             }
 
             0xBD => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = abx(operand, self.x);
                 lda(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -928,7 +971,7 @@ impl Cpu {
             }
 
             0xBE => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = aby(operand, self.y);
                 ldx(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -994,7 +1037,7 @@ impl Cpu {
             }
 
             0xCC => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 cpy(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -1002,7 +1045,7 @@ impl Cpu {
             }
 
             0xCD => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 cmp(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -1010,7 +1053,7 @@ impl Cpu {
             }
 
             0xCE => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 dec(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -1055,7 +1098,7 @@ impl Cpu {
             }
 
             0xD9 => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = aby(operand, self.y);
                 cmp(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -1063,7 +1106,7 @@ impl Cpu {
             }
 
             0xDD => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = abx(operand, self.x);
                 cmp(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -1071,7 +1114,7 @@ impl Cpu {
             }
 
             0xDE => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, _) = abx(operand, self.x);
                 dec(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -1131,7 +1174,7 @@ impl Cpu {
             }
 
             0xEC => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 cpx(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -1139,7 +1182,7 @@ impl Cpu {
             }
 
             0xED => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 sbc(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -1147,7 +1190,7 @@ impl Cpu {
             }
 
             0xEE => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let addr = abs(operand);
                 inc(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -1192,7 +1235,7 @@ impl Cpu {
             }
 
             0xF9 => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = aby(operand, self.y);
                 sbc(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -1200,7 +1243,7 @@ impl Cpu {
             }
 
             0xFD => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, add_cycle) = abx(operand, self.x);
                 sbc(self, cpu_map.get(addr));
                 pc_inc_by = 3;
@@ -1208,7 +1251,7 @@ impl Cpu {
             }
 
             0xFE => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (addr, _) = abx(operand, self.x);
                 inc(self, addr, cpu_map);
                 pc_inc_by = 3;
@@ -1240,7 +1283,7 @@ impl Cpu {
                 cyc_inc_by = 4;
             }
             0x1C | 0x3C | 0x5C | 0x7C | 0xDC | 0xFC => {
-                let operand = cpu_map.get_16(self.pc + 1);
+                let operand = get16(cpu_map, self.pc + 1);
                 let (_, add_cycle) = abx(operand, self.x);
                 pc_inc_by = 3;
                 cyc_inc_by = 4 + add_cycle as u8;

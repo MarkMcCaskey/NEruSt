@@ -121,8 +121,11 @@ mod wasm {
         }
     }
 
+    /// controller state is a bitmap of all the buttons in this order
+    /// LEFT, UP, RIGHT, DOWN, A, B, START, SELECT
     #[no_mangle]
-    extern "C" fn run_frame(emulator: &mut Emulator) {
+    extern "C" fn run_frame(emulator: &mut Emulator, _controller_state: u8) {
+        // TODO: convert and pass controller state
         /*for it in 1..2 {
             {
                 let mut cpu_map = CpuMap {

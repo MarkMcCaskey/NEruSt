@@ -3,6 +3,18 @@ var imageData;
 var rustWasm;
 var emulatorPtr;
 var romBytes;
+var player1Controller = 0;
+
+const buttons = {
+    LEFT:   0x01,
+    UP:     0x02,
+    RIGHT:  0x04,
+    DOWN:   0x08,
+    A:      0x10,
+    B:      0x20,
+    START:  0x40,
+    SELECT: 0x80,
+}
 
 async function start() {
     console.log("start");
@@ -76,7 +88,7 @@ const loadWasm = async () => {
 };
 
 const runFrame = () => {
-    rustWasm.instance.exports.run_frame(emulatorPtr);
+    rustWasm.instance.exports.run_frame(emulatorPtr, player1Controller);
     window.requestAnimationFrame(runFrame);
 };
 
@@ -106,6 +118,51 @@ dropHandler.ondrop = function(ev) {
     ev.preventDefault();
 }
 
+function handleKeyDown(e) {
+    if (e.keyCode == 37) {
+        // left arrow pressed
+        player1Controller |= buttons.LEFT;
+    } else if ( e.keyCode == 38) {
+        // up arrow pressed
+        player1Controller |= buttons.UP;
+    } else if ( e.keyCode == 39) {
+        // right arrow pressed
+        player1Controller |= buttons.RIGHT;
+    } else if ( e.keyCode == 40) {
+        // down arrow pressed
+        player1Controller |= buttons.DOWN;
+    } else if ( e.keyCode == 65) {
+        // A on qwerty keycode pressed
+        player1Controller |= buttons.A;
+    } else if ( e.keyCode == 79) {
+        // S on qwerty keycode pressed
+        player1Controller |= buttons.B;
+    } 
+}
+
+function handleKeyUp(e) {
+    if (e.keyCode == 37) {
+        // left arrow released
+        player1Controller &= ~buttons.LEFT;
+    } else if ( e.keyCode == 38) {
+        // up arrow released
+        player1Controller &= ~buttons.UP;
+    } else if ( e.keyCode == 39) {
+        // right arrow released
+        player1Controller &= ~buttons.RIGHT;
+    } else if ( e.keyCode == 40) {
+        // down arrow released
+        player1Controller &= ~buttons.DOWN;
+    } else if ( e.keyCode == 65) {
+        // A on qwerty keycode released
+        player1Controller &= ~buttons.A;
+    } else if ( e.keyCode == 79) {
+        // S on qwerty keycode released
+        player1Controller &= ~buttons.B;
+    } 
+}
+
+
 function setUpHandlers() {
     // file handling
     document.getElementById('fileInput').addEventListener('change', function() {
@@ -116,4 +173,18 @@ function setUpHandlers() {
         }
         reader.readAsArrayBuffer(this.files[0]);
     }, false);
+
+    // TODO: add gamepad support
+    // https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API
+    window.addEventListener("gamepadconnected", function(e) {
+        console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+                    e.gamepad.index, e.gamepad.id,
+                    e.gamepad.buttons.length, e.gamepad.axes.length);
+    });
+
+    // user input support
+    //var canvas = document.getElementById('canvas')
+    // couldn't get it working on canvas directly... not sure why
+    window.addEventListener( 'keydown', handleKeyDown, true );
+    window.addEventListener( 'keyup', handleKeyUp, true );
 }

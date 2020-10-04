@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <title>NES in the browser</title>
+    <script src="nes.js"></script>
+  </head>
+  <body onload="setUpHandlers()"> <!-- onload="start()"> -->
+    <!-- TODO: use `ondragover` event for UX too-->
+    <div id="dropHandler">
+      <canvas id="canvas" width=256 height=240 style="border:1px solid #000000;"></canvas>
+      <button onclick="start()" type="button">Start</button>
+      <input type="file" id="fileInput" />
+    </div>
+  </body>
+</html>
+

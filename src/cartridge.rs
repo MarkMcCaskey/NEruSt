@@ -22,9 +22,15 @@ impl Cartridge {
         let file = File::open(rom_name).unwrap();
         let mut buf_reader = BufReader::new(file);
 
+        Self::load_from_bytes(buf_reader)
+    }
+
+    pub fn load_from_bytes<R: Read>(mut buf_reader: BufReader<R>) -> Self {
         // read the first 16 bytes
         let mut header_bytes = [0u8; 16];
-        buf_reader.read_exact(&mut header_bytes).unwrap();
+        buf_reader
+            .read_exact(&mut header_bytes)
+            .expect("read header");
 
         // create header
         let header = INESHeader::from(header_bytes);
@@ -37,22 +43,28 @@ impl Cartridge {
 
         // extract trainer if it exists (Do nothing with it for now)
         if header.contains_trainer() {
-            // the hell even is a trainer??
+            // what even is a trainer??
             let mut trainer_bytes = [0u8; 512];
-            buf_reader.read_exact(&mut trainer_bytes).unwrap();
+            buf_reader
+                .read_exact(&mut trainer_bytes)
+                .expect("read trainer");
         }
 
         // extract PRG rom
         let mut prg_rom_bytes = vec![0u8; header.get_prg_rom_size()].into_boxed_slice();
-        buf_reader.read_exact(&mut prg_rom_bytes).unwrap();
+        buf_reader
+            .read_exact(&mut prg_rom_bytes)
+            .expect("read prg rom");
         let prg_rom = Memory::from_boxed_slice(prg_rom_bytes);
 
         // extract chr rom
         let mut chr_rom_bytes = vec![0u8; header.get_chr_rom_size()].into_boxed_slice();
-        buf_reader.read_exact(&mut chr_rom_bytes).unwrap();
+        buf_reader
+            .read_exact(&mut chr_rom_bytes)
+            .expect("chr rom bytes");
         let chr_rom = Memory::from_boxed_slice(chr_rom_bytes);
 
-        // some other shit later
+        // more later
 
         // create the cart
         Self {

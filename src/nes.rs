@@ -8,6 +8,8 @@ pub struct Nes {
     cpu_ram: [u8; 0x800],
     ppu_ram: [u8; 0x4000],
 
+    controller_device: ControllerDevice,
+
     pub cpu: Cpu,
     pub ppu: Ppu,
 }
@@ -18,6 +20,8 @@ impl Nes {
             cart,
             cpu_ram: [0u8; 0x800],
             ppu_ram: [0u8; 0x4000],
+
+            controller_device: ControllerDevice::default(),
 
             cpu: Cpu::new(),
             ppu: Ppu::new(),
@@ -34,6 +38,17 @@ impl Nes {
             self.cpu.nmi();
         }
     }
+
+    pub fn set_controller_bits(&mut self, controller: Controller, bits: u8) {
+        match controller {
+            Controller::One => {
+                self.controller_device.controller1 = bits;
+            }
+            Controller::Two => {
+                self.controller_device.controller2 = bits;
+            }
+        }
+    }
 }
 
 impl Nes {
@@ -41,7 +56,9 @@ impl Nes {
         match addr {
             0x0000..=0x1FFF => self.cpu_ram[(addr & 0x7FF) as usize],
             0x2000..=0x3FFF => unimplemented!("self.ppu_read(addr & 0x7 | 0x2000)"),
-            0x4000..=0x4017 => unimplemented!(),
+            0x4000..=0x4015 => unimplemented!(),
+            0x4016 => self.controller_device.read_p1_next_bit(),
+            0x4017 => self.controller_device.read_p2_next_bit(),
             0x4018..=0x401F => unimplemented!(),
             0x4020..=0xFFFF => self.cart.cpu_view().get(addr),
         }
@@ -50,7 +67,15 @@ impl Nes {
         match addr {
             0x0000..=0x1FFF => self.cpu_ram[addr as usize] = v,
             0x2000..=0x3FFF => unimplemented!("self.ppu_write(addr, v)"),
-            0x4000..=0x4017 => unimplemented!(),
+            0x4000..=0x4015 => unimplemented!(),
+            0x4016 => {
+                if v & 1 == 1 {
+                    self.controller_device.set_loading_bits();
+                } else {
+                    self.controller_device.load_bits();
+                }
+            }
+            0x4017 => unimplemented!(),
             0x4018..=0x401F => unimplemented!(),
             0x4020..=0xFFFF => self.cart.cpu_view().set(addr, v),
         }
@@ -76,4 +101,65 @@ impl Nes {
             _ => unreachable!(),
         }
     }
+}
+
+#[derive(Debug, Clone, Default)]
+struct ControllerDevice {
+    /// The bits for controller 1.
+    /// Order is RIGHT LEFT DOWN UP START SELECT B A
+    /// Mapped to 0x4016
+    pub controller1: u8,
+    /// The bits for controller 2.
+    /// Mapped to 0x4017
+    pub controller2: u8,
+
+    c1_idx: u8,
+    c2_idx: u8,
+
+    loading_bits: bool,
+}
+
+impl ControllerDevice {
+    fn read_p1_next_bit(&mut self) -> u8 {
+        // official NES controllers return 1 after all buttons have been read
+        let cur_bit = if self.c1_idx > 7 {
+            1
+        } else {
+            (self.controller1 >> (7 - self.c1_idx)) & 1
+        };
+        self.c1_idx += 1;
+        // D1-D4 are not useful for us right now.
+        // we use 0x40 because the top 3 pins are not connected
+        0x40 | cur_bit
+    }
+
+    fn read_p2_next_bit(&mut self) -> u8 {
+        // official NES controllers return 1 after all buttons have been read
+        let cur_bit = if self.c2_idx > 7 {
+            1
+        } else {
+            (self.controller2 >> (7 - self.c2_idx)) & 1
+        };
+        self.c2_idx += 1;
+        // D1-D4 are not useful for us right now.
+        // we use 0x40 because the top 3 pins are not connected
+        0x40 | cur_bit
+    }
+
+    fn set_loading_bits(&mut self) {
+        self.loading_bits = true;
+    }
+    fn load_bits(&mut self) {
+        if self.loading_bits {
+            self.c1_idx = 0;
+            self.c2_idx = 0;
+            self.loading_bits = false;
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Controller {
+    One,
+    Two,
 }

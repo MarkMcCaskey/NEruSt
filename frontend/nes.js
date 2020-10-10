@@ -7,14 +7,14 @@ var player1Controller = 0;
 var player2Controller = 0;
 
 const buttons = {
-    LEFT:   0x01,
-    UP:     0x02,
-    RIGHT:  0x04,
-    DOWN:   0x08,
-    A:      0x10,
-    B:      0x20,
-    START:  0x40,
-    SELECT: 0x80,
+    RIGHT:  0x01,
+    LEFT:   0x02,
+    DOWN:   0x04,
+    UP:     0x08,
+    START:  0x10,
+    SELECT: 0x20,
+    B:      0x40,
+    A:      0x80,
 }
 
 async function start() {

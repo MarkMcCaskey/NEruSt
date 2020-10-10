@@ -10,7 +10,7 @@ mod ppu;
 
 use crate::args::Settings;
 use crate::cartridge::Cartridge;
-use crate::nes::Nes;
+use crate::nes::{Controller, Nes};
 
 fn main() {
     let settings = Settings::new();
@@ -65,13 +65,17 @@ mod wasm {
     }
 
     /// controller state is a bitmap of all the buttons in this order
-    /// LEFT, UP, RIGHT, DOWN, A, B, START, SELECT
+    /// RIGHT LEFT DOWN UP START SELECT B A
     ///
     /// With the first 8 bits being player 1 and the second 8 bits being player 2's
     /// input with bytes in little endian order.
     #[no_mangle]
-    extern "C" fn run_frame(emulator: &mut Emulator, _controller_state: u16) {
-        // TODO: convert and pass controller state
+    extern "C" fn run_frame(emulator: &mut Emulator, controller_state: u16) {
+        let p1_bits = controller_state as u8;
+        let p2_bits = (controller_state >> 8) as u8;
+        emulator.nes.set_controller_bits(Controller::One, p1_bits);
+        emulator.nes.set_controller_bits(Controller::Two, p2_bits);
+
         /*for it in 1..2 {
             {
                 let mut cpu_map = CpuMap {

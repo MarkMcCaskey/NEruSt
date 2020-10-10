@@ -120,7 +120,9 @@ mod wasm {
     extern "C" fn allocate_bytes(num_bytes: usize) -> *mut u8 {
         let mut bytes = vec![0; num_bytes];
         let mut byte_slice: Box<[u8]> = bytes.into_boxed_slice();
-        byte_slice.as_mut_ptr()
+        let ptr: *mut u8 = byte_slice.as_mut_ptr();
+        std::mem::forget(byte_slice);
+        ptr
     }
 
     #[no_mangle]

@@ -84,10 +84,10 @@ impl Nes {
     pub fn step_cpu(&mut self) -> u8 {
         let op = self.cpu_read(self.cpu.pc);
 
-        println!(
+        crate::log(&format!(
             "CPU: {:04X} {:2X}    A:{:02X} X:{:02X} Y:{:02X} P:{:02X} SP:{:02X}",
-            self.cpu.pc, op, self.cpu.acc, self.cpu.x, self.cpu.y, self.cpu.p, self.cpu.s,
-        );
+            self.cpu.pc, op, self.cpu.acc, self.cpu.x, self.cpu.y, self.cpu.p, self.cpu.s
+        ));
 
         // reset interrupt
         if self.cpu.reset {
@@ -100,6 +100,10 @@ impl Nes {
             let lo = self.cpu_read(0xFFFC);
             let hi = self.cpu_read(0xFFFD);
             self.cpu.pc = lo as u16 | ((hi as u16) << 8);
+            crate::log(&format!(
+                "PC: {:X}; lo: {:X}, hi: {:X}",
+                self.cpu.pc, lo, hi
+            ));
 
             // set interrupt flag
             self.cpu.set_flag(ProcessorStatusFlag::Interrupt);

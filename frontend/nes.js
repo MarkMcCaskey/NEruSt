@@ -50,6 +50,15 @@ function draw_to_screen(ptr) {
     ctx.putImageData(imageData, 0, 0);
 }
 
+function log_to_console(ptr, len) {
+    const wasmMemory = new Uint8Array(rustWasm.instance.exports.memory.buffer);
+
+    // won't work on Internet explorer or older browsers
+    const decoder = new TextDecoder();
+    const str = decoder.decode(wasmMemory.slice(ptr, ptr + len));
+    console.log(str);
+}
+
 const wasmInit = async (wasmModuleUrl, importObject) => {
     console.log("wasmInit");
 
@@ -57,6 +66,7 @@ const wasmInit = async (wasmModuleUrl, importObject) => {
     importObject = {
       env: {
           draw_screen: (ptr) => draw_to_screen(ptr),
+          console_log: (ptr, len) => log_to_console(ptr, len),
       }
     };
   }

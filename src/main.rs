@@ -23,6 +23,14 @@ fn main() {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+pub fn log(message: &str) {
+    println!("{}", message);
+}
+
+#[cfg(target_arch = "wasm32")]
+use wasm::*;
+
 #[cfg(target_arch = "wasm32")]
 mod wasm {
     use super::*;
@@ -37,6 +45,15 @@ mod wasm {
 
     extern "C" {
         fn draw_screen(ptr: usize);
+        fn console_log(str_ptr: *const u8, num_bytes: usize);
+    }
+
+    pub fn log(message: &str) {
+        let len = message.bytes().len();
+        let byte_ptr = message.as_ptr() as *const u8;
+        unsafe {
+            console_log(byte_ptr, len);
+        }
     }
 
     #[no_mangle]
@@ -51,6 +68,8 @@ mod wasm {
         let buf_reader = std::io::BufReader::new(rom_bytes);
         let cartridge = Cartridge::load_from_bytes(buf_reader);
         let nes = Nes::new(cartridge);
+
+        log("hello from wasm!");
 
         //nes.cpu.pc = 0xC000;
         let mut cpu_cyc = 7;
@@ -80,6 +99,7 @@ mod wasm {
             emulator.nes.step();
         }
 
+        /*
         for y in 0..240 {
             for x in 0..256 {
                 let idx = ((y * 256) + x) * 3;
@@ -88,7 +108,8 @@ mod wasm {
                 emulator.screen[idx + 1] = if x >= 100 && x < 200 { 255 } else { 0 };
                 emulator.screen[idx + 2] = if x >= 200 && x < 300 { 255 } else { 0 };
             }
-        }
+        }*/
+        emulator.nes.draw_screen(&mut emulator.screen);
 
         unsafe {
             draw_screen(emulator.screen.as_mut_ptr() as usize);

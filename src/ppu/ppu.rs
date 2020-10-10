@@ -16,6 +16,11 @@ pub struct Ppu {
     // oam
     oamaddr: u8, // $2003
 
+    x_scroll: u8, // $2005 first write
+    y_scroll: u8, // $2005 second write
+    /// whether to write to x_scroll or y_scroll
+    scroll_bit: bool,
+
     // ppu
     ppuaddr: u16, // $2006
 
@@ -48,7 +53,7 @@ impl Nes {
             }
             0x3 => unreachable!(),
             0x4 => todo!("OAM data read"),
-            0x5 => unreachable!(),
+            0x5 => unreachable!("PPU scroll registers: CPU should not need to access these"),
             0x6 => unreachable!(),
             0x7 => todo!("PPU data read"),
             _ => unimplemented!(),
@@ -67,7 +72,14 @@ impl Nes {
             0x2 => unreachable!(),
             0x3 => self.ppu.oamaddr = value,
             0x4 => todo!("OAM data write"),
-            0x5 => todo!("scroll"),
+            0x5 => {
+                if !self.ppu.scroll_bit {
+                    self.ppu.x_scroll = value;
+                } else {
+                    self.ppu.y_scroll = value;
+                }
+                self.ppu.scroll_bit = !self.ppu.scroll_bit;
+            }
             0x6 => self.ppu.ppuaddr = (self.ppu.ppuaddr << 8) | (value as u16),
             0x7 => todo!("PPU data write"),
             _ => unreachable!(),

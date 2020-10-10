@@ -1363,6 +1363,10 @@ impl Nes {
             // Shouldn't ever happen.
             // NOTE: can use unreachable!() to tell the compiler this ^
             otherwise => {
+                crate::log(&format!(
+                    "Opcode 0x{:X} has not yet been implemented",
+                    otherwise
+                ));
                 panic!("Opcode 0x{:X} has not yet been implemented", otherwise);
             }
         };

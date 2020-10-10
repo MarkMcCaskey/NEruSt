@@ -103,6 +103,34 @@ impl Nes {
     }
 }
 
+impl Nes {
+    pub fn draw_screen(&mut self, screen: &mut [u8]) {
+        let color1 = [255, 0, 0];
+        let color2 = [0, 255, 0];
+        let color3 = [0, 0, 255];
+        let color4 = [255, 255, 255];
+        let colors = [color1, color2, color3, color4];
+
+        let mut s_idx = 0;
+        // draw 32 tiles per line, do 1 line for now
+        for i in 0..256 {
+            // 8 bytes per tile
+            for j in 0..8 {
+                // 8 bits per byte
+                for k in 0..8 {
+                    let color_bit1 = (self.ppu_ram[j] >> k) & 1;
+                    let color_bit2 = (self.ppu_ram[j + 8] >> k) & 1;
+                    let color_idx = color_bit1 | (color_bit2 << 1);
+                    for byte in &colors[color_idx as usize] {
+                        screen[s_idx] = *byte;
+                        s_idx += 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 struct ControllerDevice {
     /// The bits for controller 1.

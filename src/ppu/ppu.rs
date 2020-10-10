@@ -37,38 +37,39 @@ impl Nes {
     }
 
     pub fn ppu_read_reg(&mut self, address: u16) -> u8 {
-        match address {
-            0x2000 => unreachable!(),
-            0x2001 => unreachable!(),
-            0x2002 => {
+        match address & 0x7 {
+            0x0 => unreachable!(),
+            0x1 => unreachable!(),
+            0x2 => {
                 // the first 5 bits are whatever was previously written in a PPU register
                 let r = self.ppu.ppustatus | self.ppu.bus;
                 self.ppu.ppustatus &= 0b0110_0000; // clear first bit (and first 5)
                 r
             }
-            0x2003 => unreachable!(),
-            0x2004 => todo!("OAM data read"),
-            0x2005 => unreachable!(),
-            0x2006 => unreachable!(),
-            0x2007 => todo!("PPU data read"),
-            0x4014 => unreachable!(),
+            0x3 => unreachable!(),
+            0x4 => todo!("OAM data read"),
+            0x5 => unreachable!(),
+            0x6 => unreachable!(),
+            0x7 => todo!("PPU data read"),
             _ => unimplemented!(),
         }
     }
     /// It's undefined behavior to give an address that's not between
     /// 0x2000 and 0x3FFF inclusive.
     pub fn ppu_write_reg(&mut self, address: u16, value: u8) {
+        if address == 0x4014 {
+            todo!("OAM DMA")
+        }
         self.ppu.bus = value;
-        match address {
-            0x2000 => self.ppu.ppuctrl = value,
-            0x2001 => self.ppu.ppumask = value,
-            0x2002 => unreachable!(),
-            0x2003 => self.ppu.oamaddr = value,
-            0x2004 => todo!("OAM data write"),
-            0x2005 => todo!("scroll"),
-            0x2006 => self.ppu.ppuaddr = (self.ppu.ppuaddr << 8) | (value as u16),
-            0x2007 => todo!("PPU data write"),
-            0x4014 => todo!("OAM DMA"),
+        match address & 0x7 {
+            0x0 => self.ppu.ppuctrl = value,
+            0x1 => self.ppu.ppumask = value,
+            0x2 => unreachable!(),
+            0x3 => self.ppu.oamaddr = value,
+            0x4 => todo!("OAM data write"),
+            0x5 => todo!("scroll"),
+            0x6 => self.ppu.ppuaddr = (self.ppu.ppuaddr << 8) | (value as u16),
+            0x7 => todo!("PPU data write"),
             _ => unreachable!(),
         }
     }

@@ -90,10 +90,12 @@ pub struct CartridgeCpuView<'a> {
 
 impl<'a> CartridgeCpuView<'a> {
     pub fn get(&mut self, addr: u16) -> u8 {
-        let wrap = self.cart.header.get_prg_rom_size() as usize - 1;
+        let wrap = (self.cart.header.get_prg_rom_size() as usize)
+            .checked_sub(1)
+            .unwrap_or(0);
         match addr {
-            0x4020..=0x5FFF => unreachable!(),
-            0x6000..=0x7FFF => unreachable!(),
+            0x4020..=0x5FFF => unreachable!("cart CPU view 0x4020..=0x5FFF"),
+            0x6000..=0x7FFF => unreachable!("cart CPU view 0x6000..=0x7FFF"),
             0x8000..=0xFFFF => self.cart.prg_rom[(addr - 0x8000) as usize & wrap],
             e => panic!("Invalid address lookup in Cartridge for CPU: {:x}", e),
         }

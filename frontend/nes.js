@@ -69,19 +69,17 @@ const wasmInit = async (wasmModuleUrl, importObject) => {
 
 const loadWasm = async () => {
     console.log("loadWasm");
-  rustWasm = await wasmInit("../target/wasm32-unknown-unknown/release/NEruSt.wasm");
+  //rustWasm = await wasmInit("../target/wasm32-unknown-unknown/release/NEruSt.wasm");
+  rustWasm = await wasmInit("../target/wasm32-unknown-unknown/debug/NEruSt.wasm");
 
-    const wasmMemory = new Uint8Array(rustWasm.instance.exports.memory.buffer);
     var romBytesLen = romBytes.byteLength;
     bytePtr = rustWasm.instance.exports.allocate_bytes(romBytesLen);
+    var wasmMemory = new Uint8Array(rustWasm.instance.exports.memory.buffer);
 
     for (var i = 0; i < romBytesLen; i++) {
         wasmMemory[bytePtr + i] = romBytes[i];
     }
 
-    console.log(bytePtr);
-    console.log(romBytes);
-    console.log(romBytesLen);
     emulatorPtr = rustWasm.instance.exports.create_emulator(bytePtr, romBytesLen);
     rustWasm.instance.exports.free_bytes(bytePtr, romBytesLen);
 

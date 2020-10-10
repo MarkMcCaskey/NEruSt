@@ -76,25 +76,9 @@ mod wasm {
         emulator.nes.set_controller_bits(Controller::One, p1_bits);
         emulator.nes.set_controller_bits(Controller::Two, p2_bits);
 
-        /*for it in 1..2 {
-            {
-                let mut cpu_map = CpuMap {
-                    ram: &mut emulator.cpu_ram,
-                    ppu: &mut emulator.ppu,
-                    io: &mut emulator.io,
-                    cart: &mut emulator.cartridge.cpu_view(),
-                };
-                let inst = cpu_map.get(emulator.cpu.pc);
-                emulator.cpu_cyc += emulator.cpu.run_instruction(&mut cpu_map) as usize;
-            }
-            let mut ppu_map = PpuMap {
-                cart: &mut emulator.cartridge.ppu_view(),
-            };
-            emulator.ppu_cyc += emulator
-                .ppu
-                .run_instruction(&mut emulator.ppu_memory, &mut ppu_map)
-                as usize;
-        }*/
+        for i in 0..10000 {
+            emulator.nes.step();
+        }
 
         for y in 0..240 {
             for x in 0..256 {

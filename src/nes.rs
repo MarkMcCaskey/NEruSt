@@ -55,7 +55,7 @@ impl Nes {
     pub fn cpu_read(&mut self, addr: u16) -> u8 {
         match addr {
             0x0000..=0x1FFF => self.cpu_ram[(addr & 0x7FF) as usize],
-            0x2000..=0x3FFF => unimplemented!("self.ppu_read(addr & 0x7 | 0x2000)"),
+            0x2000..=0x3FFF => self.ppu_read_reg(addr),
             0x4000..=0x4015 => unimplemented!(),
             0x4016 => self.controller_device.read_p1_next_bit(),
             0x4017 => self.controller_device.read_p2_next_bit(),
@@ -66,7 +66,7 @@ impl Nes {
     pub fn cpu_write(&mut self, addr: u16, v: u8) {
         match addr {
             0x0000..=0x1FFF => self.cpu_ram[addr as usize] = v,
-            0x2000..=0x3FFF => unimplemented!("self.ppu_write(addr, v)"),
+            0x2000..=0x3FFF => self.ppu_write(addr, v),
             0x4000..=0x4015 => unimplemented!(),
             0x4016 => {
                 if v & 1 == 1 {

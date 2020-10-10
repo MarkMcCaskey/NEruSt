@@ -2,19 +2,17 @@
     THIS CARTRIDGE ONLY WORK FOR SMB
 */
 
-use crate::getset::GetSet;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::path::Path;
 
 use crate::header::*;
-use crate::memory::*;
 
 pub struct Cartridge {
     pub header: INESHeader,
-    pub prg_rom: Memory,
-    pub chr_rom: Memory,
+    pub prg_rom: Box<[u8]>,
+    pub chr_rom: Box<[u8]>,
 }
 
 impl Cartridge {
@@ -55,14 +53,14 @@ impl Cartridge {
         buf_reader
             .read_exact(&mut prg_rom_bytes)
             .expect("read prg rom");
-        let prg_rom = Memory::from_boxed_slice(prg_rom_bytes);
+        let prg_rom = prg_rom_bytes;
 
         // extract chr rom
         let mut chr_rom_bytes = vec![0u8; header.get_chr_rom_size()].into_boxed_slice();
         buf_reader
             .read_exact(&mut chr_rom_bytes)
             .expect("chr rom bytes");
-        let chr_rom = Memory::from_boxed_slice(chr_rom_bytes);
+        let chr_rom = chr_rom_bytes;
 
         // more later
 
@@ -80,8 +78,8 @@ impl Cartridge {
     }
 
     /// Get the PPU's view of the cartridge.
-    pub fn ppu_view(&mut self) -> CartridgeCpuView {
-        CartridgeCpuView { cart: self }
+    pub fn ppu_view(&mut self) -> CartridgePpuView {
+        CartridgePpuView { cart: self }
     }
 }
 
@@ -90,22 +88,20 @@ pub struct CartridgeCpuView<'a> {
     cart: &'a mut Cartridge,
 }
 
-impl<'a> GetSet for CartridgeCpuView<'a> {
-    fn get(&self, addr: u16) -> u8 {
-        let wrap = match self.cart.header.get_prg_rom_size() {
-            0x4000 => 0x3FFF,
-            0x8000 => 0x7FFF,
-            e => panic!("Invalid header rom for this mapper: {:x}", e), // probably
-        };
+impl<'a> CartridgeCpuView<'a> {
+    pub fn get(&mut self, addr: u16) -> u8 {
+        let wrap = self.cart.header.get_prg_rom_size() as usize - 1;
         match addr {
-            0x4020..=0x5FFF => unreachable!(), //probably
-            0x6000..=0x7FFF => unreachable!(), // probably
-            0x8000..=0xFFFF => self.cart.prg_rom.get((addr - 0x8000) & wrap),
-            e => panic!("Invalid address lookup in Cartridge: {:x}", e), // probably
+            0x4020..=0x5FFF => unreachable!(),
+            0x6000..=0x7FFF => unreachable!(),
+            0x8000..=0xFFFF => self.cart.prg_rom[(addr - 0x8000) as usize & wrap],
+            e => panic!("Invalid address lookup in Cartridge for CPU: {:x}", e),
         }
     }
 
-    fn set(&mut self, _addr: u16, _val: u8) {}
+    pub fn set(&mut self, _addr: u16, _val: u8) {
+        unreachable!()
+    }
 }
 
 /// The view the PPU has of the cartridge.
@@ -113,13 +109,15 @@ pub struct CartridgePpuView<'a> {
     cart: &'a mut Cartridge,
 }
 
-impl<'a> GetSet for CartridgePpuView<'a> {
-    fn get(&self, addr: u16) -> u8 {
+impl<'a> CartridgePpuView<'a> {
+    pub fn get(&mut self, addr: u16) -> u8 {
         match addr {
-            0x0000..=0x3FFF => self.cart.chr_rom.get(addr),
-            e => panic!("Invalid address lookup in Cartridge for PPU: {:x}", e), // probably
+            0x0000..=0x1FFF => self.cart.chr_rom[addr as usize],
+            e => unreachable!("Invalid address lookup in Cartridge for PPU: {:x}", e),
         }
     }
 
-    fn set(&mut self, _addr: u16, _val: u8) {}
+    pub fn set(&mut self, _addr: u16, _val: u8) {
+        unreachable!()
+    }
 }

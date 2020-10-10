@@ -4,6 +4,7 @@ var rustWasm;
 var emulatorPtr;
 var romBytes;
 var player1Controller = 0;
+var player2Controller = 0;
 
 const buttons = {
     LEFT:   0x01,
@@ -88,7 +89,9 @@ const loadWasm = async () => {
 };
 
 const runFrame = () => {
-    rustWasm.instance.exports.run_frame(emulatorPtr, player1Controller);
+    // TODO: handle endianness, ensure this is little endian on all platforms.
+    const input = (player2Controller << 8) | player1Controller;
+    rustWasm.instance.exports.run_frame(emulatorPtr, input);
     window.requestAnimationFrame(runFrame);
 };
 

@@ -84,13 +84,14 @@ impl Nes {
     pub fn step_cpu(&mut self) -> u8 {
         let op = self.cpu_read(self.cpu.pc);
 
-        crate::log(&format!(
+        /*crate::log(&format!(
             "CPU: {:04X} {:2X}    A:{:02X} X:{:02X} Y:{:02X} P:{:02X} SP:{:02X}",
             self.cpu.pc, op, self.cpu.acc, self.cpu.x, self.cpu.y, self.cpu.p, self.cpu.s
-        ));
+        ));*/
 
         // reset interrupt
         if self.cpu.reset {
+            crate::log("Interrupt: reset");
             self.cpu.reset = false;
 
             // reset supresses stack writes, so just offset by 3
@@ -100,10 +101,6 @@ impl Nes {
             let lo = self.cpu_read(0xFFFC);
             let hi = self.cpu_read(0xFFFD);
             self.cpu.pc = lo as u16 | ((hi as u16) << 8);
-            crate::log(&format!(
-                "PC: {:X}; lo: {:X}, hi: {:X}",
-                self.cpu.pc, lo, hi
-            ));
 
             // set interrupt flag
             self.cpu.set_flag(ProcessorStatusFlag::Interrupt);
@@ -114,6 +111,7 @@ impl Nes {
 
         // NMI interrupt
         if self.cpu.nmi {
+            crate::log("Interrupt: NMI");
             self.cpu.nmi = false;
 
             // push flags and PC to stack
@@ -218,6 +216,7 @@ impl Nes {
             0x10 => {
                 let operand = self.cpu_read(self.cpu.pc + 1);
                 let result = self.bpl(operand);
+                //crate::log(&format!("Branch taken: BPL -> {:04X}", self.cpu.pc));
                 pc_inc_by = 2;
                 cyc_inc_by = 2 + result; // + page boundary crossed
             }
@@ -368,6 +367,7 @@ impl Nes {
             0x30 => {
                 let operand = self.cpu_read(self.cpu.pc + 1);
                 let result = self.bmi(operand);
+                //crate::log(&format!("Branch taken: BMI -> {:04X}", self.cpu.pc));
                 pc_inc_by = 2;
                 cyc_inc_by = 2 + result; // + page boundary crossed
             }
@@ -509,6 +509,7 @@ impl Nes {
             0x50 => {
                 let operand = self.cpu_read(self.cpu.pc + 1);
                 let result = self.bvc(operand);
+                //crate::log(&format!("Branch taken: BVC -> {:04X}", self.cpu.pc));
                 pc_inc_by = 2;
                 cyc_inc_by = 2 + result; // + page boundary crossed
             }
@@ -650,6 +651,7 @@ impl Nes {
             0x70 => {
                 let operand = self.cpu_read(self.cpu.pc + 1);
                 let result = self.bvs(operand);
+                //crate::log(&format!("Branch taken: BVS -> {:04X}", self.cpu.pc));
                 pc_inc_by = 2;
                 cyc_inc_by = 2 + result; // + page boundary crossed
             }
@@ -783,6 +785,7 @@ impl Nes {
             0x90 => {
                 let operand = self.cpu_read(self.cpu.pc + 1);
                 let result = self.bcc(operand);
+                //crate::log(&format!("Branch taken: BCC -> {:04X}", self.cpu.pc));
                 pc_inc_by = 2;
                 cyc_inc_by = 2 + result; // + page boundary crossed
             }
@@ -947,6 +950,7 @@ impl Nes {
             0xB0 => {
                 let operand = self.cpu_read(self.cpu.pc + 1);
                 let result = self.bcs(operand);
+                //crate::log(&format!("Branch taken: BCS -> {:04X}", self.cpu.pc));
                 pc_inc_by = 2;
                 cyc_inc_by = 2 + result; // + page boundary crossed
             }
@@ -1125,6 +1129,7 @@ impl Nes {
             0xD0 => {
                 let operand = self.cpu_read(self.cpu.pc + 1);
                 let result = self.bne(operand);
+                //crate::log(&format!("Branch taken: BNE -> {:04X}", self.cpu.pc));
                 pc_inc_by = 2;
                 cyc_inc_by = 2 + result; // + page boundary crossed
             }
@@ -1271,6 +1276,7 @@ impl Nes {
             0xF0 => {
                 let operand = self.cpu_read(self.cpu.pc + 1);
                 let result = self.beq(operand);
+                //crate::log(&format!("Branch taken: BEQ -> {:04X}", self.cpu.pc));
                 pc_inc_by = 2;
                 cyc_inc_by = 2 + result; // + page boundary crossed
             }

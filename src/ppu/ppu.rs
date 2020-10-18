@@ -6,6 +6,7 @@ use crate::nes::Nes;
 
 #[derive(Debug, Clone, Default)]
 pub struct Ppu {
+    cycle: u32,
     bus: u8, // [TODO: explain]
 
     // status flags
@@ -38,7 +39,14 @@ impl Nes {
     /// Simulates a certain number of PPU cycles.
     /// Returns vblank.
     pub fn step_ppu(&mut self, cycles: u8) -> bool {
-        false
+        //println!("PPU: {}/89342", self.ppu.cycle);
+        self.ppu.cycle += cycles as u32;
+        if self.ppu.cycle > 89342 {
+            self.ppu.cycle -= 89342;
+            self.ppu.ppustatus |= 0b1000_0000;
+            return (self.ppu.ppuctrl & 0b1000_0000) > 0;
+        }
+        return false;
     }
 
     pub fn ppu_read_reg(&mut self, address: u16) -> u8 {
@@ -55,7 +63,12 @@ impl Nes {
             0x4 => todo!("OAM data read"),
             0x5 => unreachable!("PPU scroll registers: CPU should not need to access these"),
             0x6 => unreachable!(),
-            0x7 => todo!("PPU data read"),
+            0x7 => {
+                let value = self.ppu_ram[self.ppu.ppuaddr as usize];
+                let inc = (self.ppu.ppuctrl & 0b0100 > 0) as u16;
+                self.ppu.ppuaddr = self.ppu.ppuaddr.wrapping_add(inc) & 0x3FFF;
+                value
+            }
             _ => unimplemented!(),
         }
     }
@@ -81,7 +94,11 @@ impl Nes {
                 self.ppu.scroll_bit = !self.ppu.scroll_bit;
             }
             0x6 => self.ppu.ppuaddr = (self.ppu.ppuaddr << 8) | (value as u16),
-            0x7 => todo!("PPU data write"),
+            0x7 => {
+                self.ppu_ram[self.ppu.ppuaddr as usize] = value;
+                let inc = (self.ppu.ppuctrl & 0b0100 > 0) as u16;
+                self.ppu.ppuaddr = self.ppu.ppuaddr.wrapping_add(inc) & 0x3FFF;
+            }
             _ => unreachable!(),
         }
     }

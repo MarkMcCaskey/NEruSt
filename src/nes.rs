@@ -3,10 +3,10 @@ use crate::cpu::cpu::Cpu;
 use crate::ppu::ppu::Ppu;
 
 pub struct Nes {
-    cart: Cartridge,
+    pub cart: Cartridge,
 
-    cpu_ram: [u8; 0x800],
-    ppu_ram: [u8; 0x4000],
+    pub cpu_ram: [u8; 0x800],
+    pub ppu_ram: [u8; 0x4000],
 
     controller_device: ControllerDevice,
 
@@ -66,8 +66,8 @@ impl Nes {
     pub fn cpu_write(&mut self, addr: u16, v: u8) {
         match addr {
             0x0000..=0x1FFF => self.cpu_ram[addr as usize] = v,
-            0x2000..=0x3FFF => self.ppu_write(addr, v),
-            0x4000..=0x4015 => unimplemented!(),
+            0x2000..=0x3FFF => self.ppu_write_reg(addr, v),
+            0x4000..=0x4015 => {} // [TODO: apu and io registers]
             0x4016 => {
                 if v & 1 == 1 {
                     self.controller_device.set_loading_bits();

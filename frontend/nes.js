@@ -50,13 +50,35 @@ function draw_to_screen(ptr) {
     ctx.putImageData(imageData, 0, 0);
 }
 
-function log_to_console(ptr, len) {
+function get_string_from_memory(ptr, len) {
     const wasmMemory = new Uint8Array(rustWasm.instance.exports.memory.buffer);
 
     // won't work on Internet explorer or older browsers
     const decoder = new TextDecoder();
     const str = decoder.decode(wasmMemory.slice(ptr, ptr + len));
+
+    return str;
+}
+
+function log_to_console(ptr, len) {
+    const str = get_string_from_memory(ptr, len);
     console.log(str);
+}
+function info_to_console(ptr, len) {
+    const str = get_string_from_memory(ptr, len);
+    console.info(str);
+}
+function warn_to_console(ptr, len) {
+    const str = get_string_from_memory(ptr, len);
+    console.info(str);
+}
+function error_to_console(ptr, len) {
+    const str = get_string_from_memory(ptr, len);
+    console.info(str);
+}
+function debug_to_console(ptr, len) {
+    const str = get_string_from_memory(ptr, len);
+    console.info(str);
 }
 
 const wasmInit = async (wasmModuleUrl, importObject) => {
@@ -67,6 +89,10 @@ const wasmInit = async (wasmModuleUrl, importObject) => {
       env: {
           draw_screen: (ptr) => draw_to_screen(ptr),
           console_log: (ptr, len) => log_to_console(ptr, len),
+          console_info: (ptr, len) => info_to_console(ptr, len),
+          console_warn: (ptr, len) => warn_to_console(ptr, len),
+          console_error: (ptr, len) => error_to_console(ptr, len),
+          console_debug: (ptr, len) => debug_to_console(ptr, len),
       }
     };
   }

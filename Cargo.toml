@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 #sdl2 = {version = "0.31", features = ["bundled"]}
 clap = "^2.31"
+log = { version = "0.4", features = ["std"] }

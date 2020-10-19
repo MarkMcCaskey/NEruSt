@@ -84,10 +84,16 @@ impl Nes {
     pub fn step_cpu(&mut self) -> u8 {
         let op = self.cpu_read(self.cpu.pc);
 
-        /*crate::log(&format!(
+        trace!(
             "CPU: {:04X} {:2X}    A:{:02X} X:{:02X} Y:{:02X} P:{:02X} SP:{:02X}",
-            self.cpu.pc, op, self.cpu.acc, self.cpu.x, self.cpu.y, self.cpu.p, self.cpu.s
-        ));*/
+            self.cpu.pc,
+            op,
+            self.cpu.acc,
+            self.cpu.x,
+            self.cpu.y,
+            self.cpu.p,
+            self.cpu.s
+        );
 
         // reset interrupt
         if self.cpu.reset {
@@ -1373,10 +1379,7 @@ impl Nes {
             // Shouldn't ever happen.
             // NOTE: can use unreachable!() to tell the compiler this ^
             otherwise => {
-                crate::log(&format!(
-                    "Opcode 0x{:X} has not yet been implemented",
-                    otherwise
-                ));
+                error!("Opcode 0x{:X} has not yet been implemented", otherwise);
                 panic!("Opcode 0x{:X} has not yet been implemented", otherwise);
             }
         };

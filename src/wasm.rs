@@ -62,7 +62,7 @@ pub fn debug(message: &str) {
 
 #[no_mangle]
 unsafe extern "C" fn create_emulator(rom_bytes: *mut u8, num_bytes: usize) -> Box<Emulator> {
-    logging::attach_logger(::log::LevelFilter::Trace);
+    logging::attach_logger(::log::LevelFilter::Debug);
     let rom_bytes: &[u8] = std::slice::from_raw_parts(rom_bytes, num_bytes);
     let emu = create_emulator_inner(rom_bytes);
 

@@ -30,7 +30,6 @@ async function start() {
 }
 
 function draw_to_screen(ptr) {
-    console.log("draw to screen " + ptr);
     var imageData = ctx.getImageData(0, 0, 256, 240);
     var data = imageData.data;
 

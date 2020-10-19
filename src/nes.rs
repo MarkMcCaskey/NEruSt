@@ -67,7 +67,9 @@ impl Nes {
         match addr {
             0x0000..=0x1FFF => self.cpu_ram[addr as usize] = v,
             0x2000..=0x3FFF => self.ppu_write_reg(addr, v),
-            0x4000..=0x4015 => {} // [TODO: apu and io registers]
+            0x4000..=0x4015 => {
+                warn!("Write to 0x{:X} ignored: sound not yet implemented", addr);
+            }
             0x4016 => {
                 if v & 1 == 1 {
                     self.controller_device.set_loading_bits();
@@ -75,7 +77,7 @@ impl Nes {
                     self.controller_device.load_bits();
                 }
             }
-            0x4017 => unimplemented!(),
+            0x4017 => warn!("Write to 0x4017 ignored: sound not yet implemented"),
             0x4018..=0x401F => unimplemented!(),
             0x4020..=0xFFFF => self.cart.cpu_view().set(addr, v),
         }

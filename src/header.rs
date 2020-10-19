@@ -33,7 +33,12 @@ impl INESHeader {
     }
 
     pub fn get_prg_ram_size(&self) -> usize {
-        self.data[8] as usize * 1892
+        if self.data[8] == 0 {
+            // 8 KiB
+            0x2000
+        } else {
+            self.data[8] as usize * 0x2000
+        }
     }
 
     pub fn contains_trainer(&self) -> bool {

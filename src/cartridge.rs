@@ -12,6 +12,8 @@ use crate::header::*;
 pub struct Cartridge {
     pub header: INESHeader,
     pub prg_rom: Box<[u8]>,
+    /// Battery-backed save/work RAM
+    pub prg_ram: Box<[u8]>,
     pub chr_rom: Box<[u8]>,
 }
 
@@ -32,6 +34,13 @@ impl Cartridge {
 
         // create header
         let header = INESHeader::from(header_bytes);
+
+        // map this ram to 0x6000 - 0x7FFF
+        debug!(
+            "Found {} bytes of PRG RAM in header",
+            header.get_prg_ram_size()
+        );
+        let prg_ram = vec![0; header.get_prg_ram_size()].into_boxed_slice();
 
         // load the mapper
         let _mapper = match header.get_mapper_id() {
@@ -68,6 +77,7 @@ impl Cartridge {
         Self {
             header,
             prg_rom,
+            prg_ram,
             chr_rom,
         }
     }
@@ -90,19 +100,33 @@ pub struct CartridgeCpuView<'a> {
 
 impl<'a> CartridgeCpuView<'a> {
     pub fn get(&mut self, addr: u16) -> u8 {
-        let wrap = (self.cart.header.get_prg_rom_size() as usize)
+        let rom_wrap = (self.cart.header.get_prg_rom_size() as usize)
             .checked_sub(1)
             .unwrap_or(0);
+        let ram_wrap = (self.cart.header.get_prg_ram_size() as usize);
         match addr {
             0x4020..=0x5FFF => unreachable!("cart CPU view 0x4020..=0x5FFF"),
-            0x6000..=0x7FFF => unreachable!("cart CPU view 0x6000..=0x7FFF"),
-            0x8000..=0xFFFF => self.cart.prg_rom[(addr - 0x8000) as usize & wrap],
+            0x6000..=0x7FFF => self.cart.prg_ram[(addr - 0x6000) as usize & ram_wrap],
+            0x8000..=0xFFFF => self.cart.prg_rom[(addr - 0x8000) as usize & rom_wrap],
             e => panic!("Invalid address lookup in Cartridge for CPU: {:x}", e),
         }
     }
 
-    pub fn set(&mut self, _addr: u16, _val: u8) {
-        unreachable!()
+    pub fn set(&mut self, addr: u16, val: u8) {
+        match addr {
+            0x6000..=0x7FFF => {
+                let ram_wrap = (self.cart.header.get_prg_ram_size() as usize);
+                self.cart.prg_ram[(addr - 0x6000) as usize & ram_wrap] = val;
+            }
+            _ => {
+                error!(
+                    "Attempting to write to cartridge 0x{:X} with value {}",
+                    addr, val
+                );
+
+                unreachable!()
+            }
+        }
     }
 }
 
@@ -120,6 +144,10 @@ impl<'a> CartridgePpuView<'a> {
     }
 
     pub fn set(&mut self, _addr: u16, _val: u8) {
+        error!(
+            "Attempting to write to cartridge 0x{:X} with value {}",
+            _addr, _val
+        );
         unreachable!()
     }
 }

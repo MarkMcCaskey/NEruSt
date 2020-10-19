@@ -97,7 +97,7 @@ impl Nes {
 
         // reset interrupt
         if self.cpu.reset {
-            crate::log("Interrupt: reset");
+            trace!("Interrupt: reset");
             self.cpu.reset = false;
 
             // reset supresses stack writes, so just offset by 3
@@ -117,7 +117,7 @@ impl Nes {
 
         // NMI interrupt
         if self.cpu.nmi {
-            crate::log("Interrupt: NMI");
+            trace!("Interrupt: NMI");
             self.cpu.nmi = false;
 
             // push flags and PC to stack

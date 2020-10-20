@@ -120,13 +120,14 @@ impl Nes {
 
         let mut s_idx = 0;
         // draw 32 tiles per line, do 1 line for now
-        for i in 0..256 {
+        for i in 0..512 {
             // 8 bytes per tile
             for j in 0..8 {
+                let idx = (i * 16) + j;
                 // 8 bits per byte
-                for k in 0..8 {
-                    let color_bit1 = (self.ppu_ram[j] >> k) & 1;
-                    let color_bit2 = (self.ppu_ram[j + 8] >> k) & 1;
+                for k in (0..8usize).rev() {
+                    let color_bit1 = (self.ppu_read(idx) >> k) & 1;
+                    let color_bit2 = (self.ppu_read(idx + 8) >> k) & 1;
                     let color_idx = color_bit1 | (color_bit2 << 1);
                     for byte in &colors[color_idx as usize] {
                         screen[s_idx] = *byte;

@@ -1,3 +1,4 @@
+use crate::apu::Apu;
 use crate::cartridge::Cartridge;
 use crate::cpu::cpu::Cpu;
 use crate::ppu::ppu::Ppu;
@@ -12,6 +13,7 @@ pub struct Nes {
 
     pub cpu: Cpu,
     pub ppu: Ppu,
+    pub apu: Apu,
 }
 
 impl Nes {
@@ -25,6 +27,7 @@ impl Nes {
 
             cpu: Cpu::new(),
             ppu: Ppu::new(),
+            apu: Apu::new(),
         }
     }
 
@@ -56,7 +59,11 @@ impl Nes {
         match addr {
             0x0000..=0x1FFF => self.cpu_ram[(addr & 0x7FF) as usize],
             0x2000..=0x3FFF => self.ppu_read_reg(addr),
-            0x4000..=0x4015 => unimplemented!(),
+            0x4014 => {
+                warn!("OAM DMA not yet implemented");
+                0
+            }
+            0x4000..=0x4013 | 0x4015 => self.apu.read(addr),
             0x4016 => self.controller_device.read_p1_next_bit(),
             0x4017 => self.controller_device.read_p2_next_bit(),
             0x4018..=0x401F => unimplemented!(),
@@ -67,9 +74,8 @@ impl Nes {
         match addr {
             0x0000..=0x1FFF => self.cpu_ram[addr as usize] = v,
             0x2000..=0x3FFF => self.ppu_write_reg(addr, v),
-            0x4000..=0x4015 => {
-                warn!("Write to 0x{:X} ignored: sound not yet implemented", addr);
-            }
+            0x4014 => warn!("OAM DMA not yet implemented"),
+            0x4000..=0x4013 | 0x4015 | 0x4017 => self.apu.write(addr, v),
             0x4016 => {
                 if v & 1 == 1 {
                     self.controller_device.set_loading_bits();
@@ -77,7 +83,6 @@ impl Nes {
                     self.controller_device.load_bits();
                 }
             }
-            0x4017 => warn!("Write to 0x4017 ignored: sound not yet implemented"),
             0x4018..=0x401F => unimplemented!(),
             0x4020..=0xFFFF => self.cart.cpu_view().set(addr, v),
         }

@@ -25,7 +25,7 @@ fn main() {
     let cart = Cartridge::load_from_file(&settings.rom_file);
     let mut nes = Nes::new(cart);
 
-    for it in 0..37290 {
+    for it in 0.. {
         nes.step();
     }
 }

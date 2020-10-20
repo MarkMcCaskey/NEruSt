@@ -84,7 +84,7 @@ impl Nes {
     pub fn step_cpu(&mut self) -> u8 {
         let op = self.cpu_read(self.cpu.pc);
 
-        trace!(
+        /*trace!(
             "CPU: {:04X} {:2X}    A:{:02X} X:{:02X} Y:{:02X} P:{:02X} SP:{:02X}",
             self.cpu.pc,
             op,
@@ -93,7 +93,7 @@ impl Nes {
             self.cpu.y,
             self.cpu.p,
             self.cpu.s
-        );
+        );*/
 
         // reset interrupt
         if self.cpu.reset {
@@ -154,7 +154,7 @@ impl Nes {
             0x00 => {
                 self.brk();
                 pc_inc_by = 1;
-                cyc_inc_by = 7;
+                cyc_inc_by = 0; // eh
             }
 
             0x01 => {

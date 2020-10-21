@@ -5,6 +5,15 @@ var emulatorPtr;
 var romBytes;
 var player1Controller = 0;
 var player2Controller = 0;
+var currentVolume = 100;
+var audioContext;
+// used to control master volume
+var gainNode;
+var channel1;
+var channel2;
+var channel3;
+var channel4;
+var channel5;
 
 const buttons = {
     RIGHT:  0x01,
@@ -17,6 +26,24 @@ const buttons = {
     A:      0x80,
 }
 
+async function initSound() {
+    audioContext = new window.AudioContext();
+    gainNode = audioContext.createGain();
+    channel1 = audioContext.createOscillator();
+    channel1.type = "square";
+    channel1.connect(gainNode);
+
+    channel2 = audioContext.createOscillator();
+    channel2.type = "square";
+    channel2.connect(gainNode);
+
+    channel3 = audioContext.createOscillator();
+    channel3.type = "triangle";
+    channel3.connect(gainNode);
+
+    gainNode.connect(audioContext.destination);
+}
+
 async function start() {
     console.log("start");
     const canvas = document.getElementById('canvas');
@@ -26,6 +53,7 @@ async function start() {
     ctx.fillRect(10, 10, 150, 100);
 
     imageData = ctx.createImageData(256, 240);
+
     await loadWasm();
 }
 
@@ -223,4 +251,12 @@ function setUpHandlers() {
     // couldn't get it working on canvas directly... not sure why
     window.addEventListener( 'keydown', handleKeyDown, true );
     window.addEventListener( 'keyup', handleKeyUp, true );
+
+    initSound();
+
+    var volumeSlider = document.getElementById("volumeSlider");
+    volumeSlider.oninput = function() {
+        currentVolume = this.value;
+        gainNode.gain.setValueAtTime(currentVolume / 100.0, audioContext.currentTime);
+    };
 }

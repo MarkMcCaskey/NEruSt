@@ -165,7 +165,8 @@ impl ControllerDevice {
         };
         self.c1_idx += 1;
         // D1-D4 are not useful for us right now.
-        // we use 0x40 because the top 3 pins are not connected
+        // we use 0x40 because the top 3 pins are not connected and we're
+        // reading from an address with those bits set so they're still on the bus.
         0x40 | cur_bit
     }
 
@@ -178,7 +179,8 @@ impl ControllerDevice {
         };
         self.c2_idx += 1;
         // D1-D4 are not useful for us right now.
-        // we use 0x40 because the top 3 pins are not connected
+        // we use 0x40 because the top 3 pins are not connected and we're
+        // reading from an address with those bits set so they're still on the bus.
         0x40 | cur_bit
     }
 

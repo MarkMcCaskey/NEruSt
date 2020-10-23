@@ -45,14 +45,14 @@ impl Nes {
         for _ in 0..cycles {
             match (self.ppu.scanline, self.ppu.cycle) {
                 // scanlines 0-239 (render)
-                (0..=239, 0) => { /* Idle */ },
-                (0..=239, 1..=256) => { /* Draw */ },
-                (0..=239, 257..=320) => { /* Next SL sprites */ },
-                (0..=239, 321..=336) => { /* Next SL tiles */ },
-                (0..=239, 337..=340) => { /* Dummy fetches */ },
+                (0..=239, 0) => { /* Idle */ }
+                (0..=239, 1..=256) => { /* Draw */ }
+                (0..=239, 257..=320) => { /* Next SL sprites */ }
+                (0..=239, 321..=336) => { /* Next SL tiles */ }
+                (0..=239, 337..=340) => { /* Dummy fetches */ }
 
                 // scanline 240 (post-render)
-                (240, _) => { /* Do nothing */ },
+                (240, _) => { /* Do nothing */ }
 
                 // scanlines 241-260 (vblank)
                 (241, 1) => {
@@ -60,7 +60,7 @@ impl Nes {
                     self.ppu.ppustatus |= 0b1000_0000;
                     out = (self.ppu.ppuctrl & 0b1000_0000) > 0;
                 }
-                (241..=260, _) => { /* Do nothing */ },
+                (241..=260, _) => { /* Do nothing */ }
 
                 // scanline 261 (pre-render)
                 (261, _) => { /* Pre render scanline */ }
@@ -72,7 +72,7 @@ impl Nes {
             if self.ppu.cycle > 340 {
                 self.ppu.cycle = 0;
                 self.ppu.scanline += 1;
-                if self.ppu.scanline > 261 { 
+                if self.ppu.scanline > 261 {
                     self.ppu.scanline = 0;
                 }
             }

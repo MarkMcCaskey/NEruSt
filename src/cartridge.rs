@@ -20,7 +20,7 @@ pub struct Cartridge {
 impl Cartridge {
     pub fn load_from_file(rom_name: &Path) -> Self {
         let file = File::open(rom_name).unwrap();
-        let mut buf_reader = BufReader::new(file);
+        let buf_reader = BufReader::new(file);
 
         Self::load_from_bytes(buf_reader)
     }
@@ -103,7 +103,7 @@ impl<'a> CartridgeCpuView<'a> {
         let rom_wrap = (self.cart.header.get_prg_rom_size() as usize)
             .checked_sub(1)
             .unwrap_or(0);
-        let ram_wrap = (self.cart.header.get_prg_ram_size() as usize);
+        let ram_wrap = self.cart.header.get_prg_ram_size() as usize;
         match addr {
             0x4020..=0x5FFF => unreachable!("cart CPU view 0x4020..=0x5FFF"),
             0x6000..=0x7FFF => self.cart.prg_ram[(addr - 0x6000) as usize & ram_wrap],
@@ -115,7 +115,7 @@ impl<'a> CartridgeCpuView<'a> {
     pub fn set(&mut self, addr: u16, val: u8) {
         match addr {
             0x6000..=0x7FFF => {
-                let ram_wrap = (self.cart.header.get_prg_ram_size() as usize);
+                let ram_wrap = self.cart.header.get_prg_ram_size() as usize;
                 self.cart.prg_ram[(addr - 0x6000) as usize & ram_wrap] = val;
             }
             _ => {

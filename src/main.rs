@@ -17,7 +17,7 @@ mod wasm;
 
 use crate::args::Settings;
 use crate::cartridge::Cartridge;
-use crate::nes::{Controller, Nes};
+use crate::nes::{Nes};
 
 fn main() {
     logging::attach_logger(::log::LevelFilter::Trace);
@@ -26,7 +26,7 @@ fn main() {
     let cart = Cartridge::load_from_file(&settings.rom_file);
     let mut nes = Nes::new(cart);
 
-    for it in 0.. {
+    for _it in 0.. {
         nes.step();
     }
 }

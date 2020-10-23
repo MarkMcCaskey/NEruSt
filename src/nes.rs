@@ -112,7 +112,12 @@ impl Nes {
 
 impl Nes {
     pub fn draw_screen(&mut self, screen: &mut [u8]) {
-        let color1 = [255, 0, 0];
+        let pixels = self.get_frame();
+        for index in 0..pixels.len() {
+            screen[index] = pixels[index];
+        }
+
+        /*let color1 = [255, 0, 0];
         let color2 = [0, 255, 0];
         let color3 = [0, 0, 255];
         let color4 = [255, 255, 255];
@@ -135,7 +140,7 @@ impl Nes {
                     }
                 }
             }
-        }
+        }*/
     }
 }
 

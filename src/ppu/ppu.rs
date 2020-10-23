@@ -38,6 +38,63 @@ impl Ppu {
 }
 
 impl Nes {
+    ///
+    pub fn get_frame(&mut self) -> Box<[u8]> {
+        let color1 = [255, 0, 0];
+        let color2 = [0, 255, 0];
+        let color3 = [0, 0, 255];
+        let color4 = [255, 255, 255];
+        let colors = [color1, color2, color3, color4];
+
+        let mut out = Box::new([0u8; 30 * 32 * 3]);
+
+        // loop the attribute table 0x2000 .. 0x2800
+        for col in 0..32 {
+            for row in 0..30 {
+                // get the pattern index from the nametable at (row, col)
+                let pattern = self.ppu_read(0x2000 + row + col * 30) as u16;
+
+                // extract the 16 bytes from the pattern table
+                let b01 = self.ppu_read(pattern << 4 | 0x0);
+                let b02 = self.ppu_read(pattern << 4 | 0x1);
+                let b03 = self.ppu_read(pattern << 4 | 0x2);
+                let b04 = self.ppu_read(pattern << 4 | 0x3);
+                let b05 = self.ppu_read(pattern << 4 | 0x4);
+                let b06 = self.ppu_read(pattern << 4 | 0x5);
+                let b07 = self.ppu_read(pattern << 4 | 0x6);
+                let b08 = self.ppu_read(pattern << 4 | 0x7);
+                let b09 = self.ppu_read(pattern << 4 | 0x8);
+                let b10 = self.ppu_read(pattern << 4 | 0x9);
+                let b11 = self.ppu_read(pattern << 4 | 0xA);
+                let b12 = self.ppu_read(pattern << 4 | 0xB);
+                let b13 = self.ppu_read(pattern << 4 | 0xC);
+                let b14 = self.ppu_read(pattern << 4 | 0xD);
+                let b15 = self.ppu_read(pattern << 4 | 0xE);
+                let b16 = self.ppu_read(pattern << 4 | 0xF);
+
+                // extract pixel data from the above 16 bytes
+                let bs1 = [b01, b02, b03, b04, b05, b06, b07, b08];
+                let bs2 = [b09, b10, b11, b12, b13, b14, b15, b16];
+                for index in 0..8 {
+                    for pixel in 0..8 {
+                        let pal_index =
+                            (bs2[index] >> pixel) & 0x1 | ((bs1[index] >> pixel) & 0x1 << 1);
+                        let color = colors[pal_index as usize];
+
+                        let y = col as usize * 8 + index;
+                        let x = row as usize * 8 + pixel;
+                        let oi = x + y * 30 * 8 * 3;
+                        out[oi + 0] = color[0];
+                        out[oi + 1] = color[1];
+                        out[oi + 2] = color[2];
+                    }
+                }
+            }
+        }
+
+        out
+    }
+
     /// Simulates a certain number of PPU cycles.
     /// Returns vblank.
     pub fn step_ppu(&mut self, cycles: u8) -> bool {

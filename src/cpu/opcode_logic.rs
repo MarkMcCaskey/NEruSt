@@ -494,7 +494,7 @@ impl Nes {
             .cpu
             .get_processor_status_flag(ProcessorStatusFlag::Negative)
         {
-            let old_pc = self.cpu.pc;
+            let _old_pc = self.cpu.pc;
             self.cpu.pc = (self.cpu.pc as i16 + val as i8 as i16) as u16;
             return 1 + (0/*self.cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
         }
@@ -507,7 +507,7 @@ impl Nes {
             .cpu
             .get_processor_status_flag(ProcessorStatusFlag::Negative)
         {
-            let old_pc = self.cpu.pc;
+            let _old_pc = self.cpu.pc;
             self.cpu.pc = (self.cpu.pc as i16 + val as i8 as i16) as u16;
             return 1 + (0/*self.cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
         }
@@ -520,7 +520,7 @@ impl Nes {
             .cpu
             .get_processor_status_flag(ProcessorStatusFlag::Overflow)
         {
-            let old_pc = self.cpu.pc;
+            let _old_pc = self.cpu.pc;
             self.cpu.pc = (self.cpu.pc as i16 + val as i8 as i16) as u16;
             return 1 + (0/*self.cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
         }
@@ -533,7 +533,7 @@ impl Nes {
             .cpu
             .get_processor_status_flag(ProcessorStatusFlag::Overflow)
         {
-            let old_pc = self.cpu.pc;
+            let _old_pc = self.cpu.pc;
             self.cpu.pc = (self.cpu.pc as i16 + val as i8 as i16) as u16;
             return 1 + (0/*self.cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
         }
@@ -546,7 +546,7 @@ impl Nes {
             .cpu
             .get_processor_status_flag(ProcessorStatusFlag::Carry)
         {
-            let old_pc = self.cpu.pc;
+            let _old_pc = self.cpu.pc;
             self.cpu.pc = (self.cpu.pc as i16 + val as i8 as i16) as u16;
             return 1 + (0/*self.cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
         }
@@ -559,7 +559,7 @@ impl Nes {
             .cpu
             .get_processor_status_flag(ProcessorStatusFlag::Carry)
         {
-            let old_pc = self.cpu.pc;
+            let _old_pc = self.cpu.pc;
             self.cpu.pc = (self.cpu.pc as i16 + val as i8 as i16) as u16;
             return 1 + (0/*self.cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
         }
@@ -572,7 +572,7 @@ impl Nes {
             .cpu
             .get_processor_status_flag(ProcessorStatusFlag::Zero)
         {
-            let old_pc = self.cpu.pc;
+            let _old_pc = self.cpu.pc;
             self.cpu.pc = (self.cpu.pc as i16 + val as i8 as i16) as u16;
             return 1 + (0/*self.cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
         }
@@ -585,7 +585,7 @@ impl Nes {
             .cpu
             .get_processor_status_flag(ProcessorStatusFlag::Zero)
         {
-            let old_pc = self.cpu.pc;
+            let _old_pc = self.cpu.pc;
             self.cpu.pc = (self.cpu.pc as i16 + val as i16) as u16;
             return 1 + (0/*self.cpu.pc & 0xFF00 != old_pc & 0xFF00*/) as u8;
         }

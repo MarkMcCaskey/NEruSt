@@ -5,6 +5,7 @@ mod args;
 //mod cpu;
 //mod window;
 
+mod apu;
 mod cartridge;
 mod cpu;
 mod header;

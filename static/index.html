@@ -2,6 +2,7 @@
   <head>
     <title>NES in the browser</title>
     <script src="nes.js"></script>
+    <link rel="stylesheet" href="styles.css">
   </head>
   <body onload="setUpHandlers()"> <!-- onload="start()"> -->
     <!-- TODO: use `ondragover` event for UX too-->
@@ -9,6 +10,10 @@
       <canvas id="canvas" width=256 height=240 style="border:1px solid #000000;"></canvas>
       <button onclick="start()" type="button">Start</button>
       <input type="file" id="fileInput" />
+      <div class="slidecontainer">
+        <label for="volumeSlider">Volume</label>
+        <input type="range" min="0" max="100" value="100" class="slider" id="volumeSlider">
+      </div>
     </div>
   </body>
 </html>

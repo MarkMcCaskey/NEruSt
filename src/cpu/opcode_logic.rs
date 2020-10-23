@@ -160,7 +160,7 @@ impl Nes {
     }
 
     pub fn pla(&mut self) {
-        self.cpu.s += 1;
+        self.cpu.s = self.cpu.s.wrapping_add(1);
         let idx = self.cpu.s as u16 + 0x100;
         self.cpu.acc = self.cpu_read(idx);
 
@@ -174,12 +174,12 @@ impl Nes {
     pub fn pha(&mut self) {
         let idx = self.cpu.s as u16 + 0x100;
         self.cpu_write(idx, self.cpu.acc);
-        self.cpu.s -= 1;
+        self.cpu.s = self.cpu.s.wrapping_sub(1);
     }
 
     // TODO: possibly wrong
     pub fn plp(&mut self) {
-        self.cpu.s += 1;
+        self.cpu.s = self.cpu.s.wrapping_add(1);
         let idx = self.cpu.s as u16 + 0x100;
         self.cpu.p = self.cpu_read(idx) & 0b11001111 | 0b00100000;
     }
@@ -188,7 +188,7 @@ impl Nes {
     pub fn php(&mut self) {
         let idx = self.cpu.s as u16 + 0x100;
         self.cpu_write(idx as u16, self.cpu.p | 0b00110000);
-        self.cpu.s -= 1;
+        self.cpu.s = self.cpu.s.wrapping_sub(1);
     }
 
     //////////////////////////////////////////////////
@@ -595,16 +595,10 @@ impl Nes {
 
     // TODO: this function is probably wrong
     pub fn brk(&mut self) {
-        unimplemented!();
         self.cpu
             .set_flag_value(ProcessorStatusFlag::Interrupt, true);
         self.cpu.set_flag_value(ProcessorStatusFlag::Break, true);
-        let idx = self.cpu.s;
-        self.cpu_write(idx as u16, self.cpu.pc as u8);
-        self.cpu_write(idx.wrapping_sub(1) as u16, (self.cpu.pc >> 8) as u8);
-        self.cpu_write(idx.wrapping_sub(2) as u16, self.cpu.p);
-        self.cpu.s = self.cpu.s.wrapping_sub(3);
-        self.cpu.pc = self.cpu_read(0xFFFE) as u16 | ((self.cpu_read(0xFFFF) as u16) << 8);
+        self.cpu.nmi = true;
     }
 
     pub fn rti(&mut self) {
@@ -612,14 +606,14 @@ impl Nes {
         let lo = self.cpu_read(self.cpu.s.wrapping_add(2) as u16 | 0x100);
         let hi = self.cpu_read(self.cpu.s.wrapping_add(3) as u16 | 0x100);
         self.cpu.pc = lo as u16 | ((hi as u16) << 8);
-        self.cpu.s += 3;
+        self.cpu.s = self.cpu.s.wrapping_add(3);
     }
 
     pub fn jsr(&mut self, addr: u16) {
         let push = self.cpu.pc.wrapping_add(3).wrapping_sub(1);
         self.cpu_write(self.cpu.s as u16 | 0x100, (push >> 8) as u8);
         self.cpu_write(self.cpu.s.wrapping_sub(1) as u16 | 0x100, push as u8);
-        self.cpu.s -= 2;
+        self.cpu.s = self.cpu.s.wrapping_sub(2);
         self.cpu.pc = addr
     }
 
@@ -627,7 +621,7 @@ impl Nes {
         let lo = self.cpu_read(self.cpu.s.wrapping_add(1) as u16 | 0x100);
         let hi = self.cpu_read(self.cpu.s.wrapping_add(2) as u16 | 0x100);
         self.cpu.pc = (lo as u16 | ((hi as u16) << 8)).wrapping_add(1);
-        self.cpu.s += 2;
+        self.cpu.s = self.cpu.s.wrapping_add(2);
     }
 
     pub fn jmp(&mut self, addr: u16) {

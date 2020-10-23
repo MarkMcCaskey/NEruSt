@@ -6,7 +6,9 @@ use crate::nes::Nes;
 
 #[derive(Debug, Clone, Default)]
 pub struct Ppu {
-    cycle: u32,
+    scanline: u16,
+    cycle: u16,
+
     bus: u8, // [TODO: explain]
 
     // status flags
@@ -39,14 +41,43 @@ impl Nes {
     /// Simulates a certain number of PPU cycles.
     /// Returns vblank.
     pub fn step_ppu(&mut self, cycles: u8) -> bool {
-        //println!("PPU: {}/89342", self.ppu.cycle);
-        self.ppu.cycle += cycles as u32;
-        if self.ppu.cycle > 89342 {
-            self.ppu.cycle -= 89342;
-            self.ppu.ppustatus |= 0b1000_0000;
-            return (self.ppu.ppuctrl & 0b1000_0000) > 0;
+        let mut out = false;
+        for _ in 0..cycles {
+            match (self.ppu.scanline, self.ppu.cycle) {
+                // scanlines 0-239 (render)
+                (0..=239, 0) => { /* Idle */ }
+                (0..=239, 1..=256) => { /* Draw */ }
+                (0..=239, 257..=320) => { /* Next SL sprites */ }
+                (0..=239, 321..=336) => { /* Next SL tiles */ }
+                (0..=239, 337..=340) => { /* Dummy fetches */ }
+
+                // scanline 240 (post-render)
+                (240, _) => { /* Do nothing */ }
+
+                // scanlines 241-260 (vblank)
+                (241, 1) => {
+                    // vblank
+                    self.ppu.ppustatus |= 0b1000_0000;
+                    out = (self.ppu.ppuctrl & 0b1000_0000) > 0;
+                }
+                (241..=260, _) => { /* Do nothing */ }
+
+                // scanline 261 (pre-render)
+                (261, _) => { /* Pre render scanline */ }
+                _ => unreachable!(),
+            }
+
+            // advance ppu/scanline
+            self.ppu.cycle += 1;
+            if self.ppu.cycle > 340 {
+                self.ppu.cycle = 0;
+                self.ppu.scanline += 1;
+                if self.ppu.scanline > 261 {
+                    self.ppu.scanline = 0;
+                }
+            }
         }
-        return false;
+        return out;
     }
 
     pub fn ppu_read_reg(&mut self, address: u16) -> u8 {
